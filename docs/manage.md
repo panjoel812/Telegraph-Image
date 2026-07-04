@@ -21,11 +21,15 @@ CREATE TABLE IF NOT EXISTS imginfo (
     `url` text,
     `referer` text,
 	`ip` varchar(255),
-	`rating` integer,
+	`rating` text,
 	`total` integer,
-	`time` DATE
+	`time` DATE,
+	`name` text,
+	`folder` text
 );
 ```
+
+如果你已经使用旧 SQL 创建过 `imginfo`，当前代码会在上传或后台查询时自动补齐 `name` 和 `folder` 两列。
 
 <img src="./img/d3.png"   height="50%" width="50%"/>
 <img src="./img/d4.png"   height="50%" width="50%"/>
@@ -49,8 +53,12 @@ CREATE TABLE IF NOT EXISTS imginfo (
 |PROXYALLIMG  | 反向代理所有图片（默认为false）| boolean |
 |BASIC_USER   | <后台管理页面登录用户名称>| string |
 |BASIC_PASS   | <后台管理页面登录用户密码>| string |
+|SECRET   | <NextAuth 随机密钥>| string |
+|API_TOKEN   | <PicGo/API 上传密钥>| string |
+|PICGO_API_TOKEN   | <PicGo/API 上传密钥别名>| string |
+|PICGO_UPLOAD_TARGET   | tgchannel 或 r2，默认为 tgchannel| string |
 |ENABLE_AUTH_API   | 是否开启tg channel访客验证 （默认为false）| boolean |
-|REGULAR_PASS | <普通用户 （tg channel访客验证）>| string |
+|REGULAR_USER | <普通用户 （tg channel访客验证）>| string |
 |REGULAR_PASS   | <普通用户密码>| string |
 |ModerateContentApiKey   | <审查图像内容的API key>| string |
 |RATINGAPI     | <[自建的鉴黄api](https://github.com/x-dr/nsfwjs-api) >| string |
