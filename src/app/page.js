@@ -35,6 +35,7 @@ export default function Home() {
   const [isAuthapi, setisAuthapi] = useState(false); // 初始选择第一个选项
   const [Loginuser, setLoginuser] = useState(''); // 初始选择第一个选项
   const [boxType, setBoxtype] = useState("img");
+  const [folderName, setFolderName] = useState('默认');
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -52,6 +53,19 @@ export default function Home() {
     const cleaned = trimmed.replace(/[\\/:*?"<>|]/g, "-");
     const fallbackExt = fallback.includes(".") ? fallback.slice(fallback.lastIndexOf(".")) : "";
     return cleaned.includes(".") || !fallbackExt ? cleaned : `${cleaned}${fallbackExt}`;
+  };
+
+  const normalizeFolderName = (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return '默认';
+    }
+
+    return trimmed
+      .split('/')
+      .map((segment) => segment.trim().replace(/[\\:*?"<>|]/g, '-'))
+      .filter(Boolean)
+      .join('/') || '默认';
   };
 
   const updateFileName = (targetIndex, name) => {
@@ -217,6 +231,7 @@ export default function Home() {
         const uploadName = uploadFile.name;
 
         formData.append(formFieldName, uploadFile, uploadName);
+        formData.append('folder', normalizeFolderName(folderName));
 
         try {
           const targetUrl = selectedOption === "tgchannel" || selectedOption === "r2"
@@ -236,6 +251,7 @@ export default function Home() {
 
             file.url = result.url;
             file.displayName = uploadName;
+            file.folder = normalizeFolderName(folderName);
 
             // 更新 uploadedImages 和 selectedFiles
             setUploadedImages((prevImages) => [...prevImages, file]);
@@ -569,6 +585,17 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[auto_1fr] md:items-center">
+            <span className="text-sm font-semibold text-slate-600">文件夹</span>
+            <input
+              value={folderName}
+              onChange={(event) => setFolderName(event.target.value)}
+              className="apple-text-field h-9 w-full"
+              placeholder="默认 / 相册 / 项目A"
+              aria-label="文件夹"
+            />
+          </div>
+
           <div
             className="liquid-dropzone relative mt-5 overflow-hidden rounded-[16px]"
             onDrop={handleDrop}
@@ -674,7 +701,7 @@ export default function Home() {
           </div>
         </div>
 
-        <ToastContainer />
+        <ToastContainer icon={false} limit={3} position="top-right" />
         <div className="min-h-[180px]">
           {uploadedImages.length > 0 && (
             <>

@@ -1,5 +1,6 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getImageDatabase } from '@/lib/cloudflareBindings';
+import { ensureImageInfoMetadataColumns } from '@/lib/imageMetadata';
 import {
   bindStatement,
   buildListQueries,
@@ -16,6 +17,7 @@ export async function POST(request) {
     payload = normalizeAdminPayload(await request.json());
     const { env } = getRequestContext();
     const database = getImageDatabase(env);
+    await ensureImageInfoMetadataColumns(database);
 
     const queries = buildListQueries(payload);
     const rowsStatement = bindStatement(database.prepare(queries.rows.sql), queries.rows.bindings);

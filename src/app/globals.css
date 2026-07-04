@@ -133,16 +133,32 @@
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 8px 18px rgba(13, 111, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.28);
   }
 
+  .apple-button-primary:hover {
+    background: #0d6fff;
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 10px 22px rgba(13, 111, 255, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  }
+
   .apple-button-danger {
     background: rgba(255, 56, 60, 0.23);
     color: #ff383c;
     box-shadow: none;
   }
 
+  .apple-button-danger:hover {
+    background: rgba(255, 56, 60, 0.30);
+    color: #ff383c;
+  }
+
   .apple-button-muted {
     background: rgba(230, 230, 230, 0.72);
     color: rgba(0, 0, 0, 0.85);
     mix-blend-mode: plus-darker;
+  }
+
+  .apple-button-muted:hover {
+    background: rgba(230, 230, 230, 0.88);
+    color: rgba(0, 0, 0, 0.85);
   }
 
   .apple-text-field,
@@ -254,6 +270,64 @@
     color: rgba(0, 0, 0, 0.85);
     mix-blend-mode: plus-darker;
   }
+
+  .Toastify__toast-container {
+    width: min(344px, calc(100vw - 32px));
+  }
+
+  .Toastify__toast {
+    min-height: 72px;
+    margin-bottom: 10px;
+    padding: 12px 9px 12px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    border-radius: 16px;
+    background:
+      linear-gradient(0deg, rgba(245, 245, 245, 0.67), rgba(245, 245, 245, 0.67)),
+      rgba(38, 38, 38, 0.34);
+    background-blend-mode: normal, color-dodge;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+    color: rgba(0, 0, 0, 0.85);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, "Segoe UI", sans-serif;
+    backdrop-filter: blur(32px) saturate(165%);
+    -webkit-backdrop-filter: blur(32px) saturate(165%);
+  }
+
+  .Toastify__toast::before {
+    content: "";
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    margin-right: 13px;
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48)),
+      #0d6fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .Toastify__toast-body {
+    align-items: flex-start;
+    gap: 0;
+    padding: 0;
+    font-size: 13px;
+    line-height: 16px;
+    letter-spacing: -0.008em;
+  }
+
+  .Toastify__toast-body > div:last-child {
+    padding-top: 0;
+  }
+
+  .Toastify__close-button {
+    align-self: flex-start;
+    color: rgba(0, 0, 0, 0.45);
+    opacity: 1;
+  }
+
+  .Toastify__progress-bar {
+    height: 3px;
+    background: rgba(13, 111, 255, 0.55);
+  }
 }
 
 /* :root {
@@ -334,4 +408,64 @@ body {
 /* 鼠标悬停在滑块上的样式 */
 .overflow-container::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.24);
+}
+
+.Toastify__toast-container {
+  width: min(344px, calc(100vw - 32px)) !important;
+}
+
+.Toastify__toast {
+  display: flex !important;
+  min-height: 72px !important;
+  margin-bottom: 10px !important;
+  padding: 12px 9px 12px 13px !important;
+  border: 1px solid rgba(255, 255, 255, 0.52) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(0deg, rgba(245, 245, 245, 0.67), rgba(245, 245, 245, 0.67)),
+    rgba(38, 38, 38, 0.34) !important;
+  background-blend-mode: normal, color-dodge !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.62) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, "Segoe UI", sans-serif !important;
+  backdrop-filter: blur(32px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(165%) !important;
+}
+
+.Toastify__toast::before {
+  content: "" !important;
+  display: block !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin-right: 13px !important;
+  border-radius: 8px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48)),
+    #0d6fff !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+.Toastify__toast-body {
+  align-items: flex-start !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 16px !important;
+  letter-spacing: -0.008em !important;
+}
+
+.Toastify__toast-body > div:last-child {
+  padding-top: 0 !important;
+}
+
+.Toastify__close-button {
+  align-self: flex-start !important;
+  color: rgba(0, 0, 0, 0.45) !important;
+  opacity: 1 !important;
+}
+
+.Toastify__progress-bar {
+  height: 3px !important;
+  background: rgba(13, 111, 255, 0.55) !important;
 }

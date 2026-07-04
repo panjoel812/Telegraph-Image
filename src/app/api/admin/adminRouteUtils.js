@@ -25,12 +25,12 @@ export function buildListQueries({ query, offset }) {
 
     return {
       rows: {
-        sql: 'SELECT * FROM imginfo WHERE url LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?',
-        bindings: [likeQuery, PAGE_SIZE, offset],
+        sql: "SELECT * FROM imginfo WHERE url LIKE ? OR COALESCE(name, '') LIKE ? OR COALESCE(folder, '') LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?",
+        bindings: [likeQuery, likeQuery, likeQuery, PAGE_SIZE, offset],
       },
       total: {
-        sql: 'SELECT COUNT(*) as total FROM imginfo WHERE url LIKE ?',
-        bindings: [likeQuery],
+        sql: "SELECT COUNT(*) as total FROM imginfo WHERE url LIKE ? OR COALESCE(name, '') LIKE ? OR COALESCE(folder, '') LIKE ?",
+        bindings: [likeQuery, likeQuery, likeQuery],
       },
     };
   }
@@ -48,7 +48,7 @@ export function buildListQueries({ query, offset }) {
 }
 
 export function buildLogQueries({ query, offset }) {
-  const selectColumns = 'SELECT tgimglog.*, imginfo.rating, imginfo.total';
+  const selectColumns = 'SELECT tgimglog.*, imginfo.rating, imginfo.total, imginfo.name, imginfo.folder';
   const joinClause = 'FROM tgimglog JOIN imginfo ON tgimglog.url = imginfo.url';
 
   if (query) {

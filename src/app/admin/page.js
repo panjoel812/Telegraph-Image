@@ -191,7 +191,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <ToastContainer limit={1} position="top-right" />
+      <ToastContainer icon={false} limit={1} position="top-right" />
     </div>
   )
 }

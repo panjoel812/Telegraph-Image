@@ -94,6 +94,14 @@ export default function Table({ data: initialData = [], isLoading = false }) {
         const lastSlashIndex = url.lastIndexOf('/');
         return url.substring(lastSlashIndex + 1);
     }
+
+    function getDisplayName(item) {
+        return item.name || getLastSegment(item.url || '');
+    }
+
+    function getFolderName(item) {
+        return item.folder || '默认';
+    }
     const renderFile = (fileUrl, index) => {
         const _url = getLastSegment(fileUrl);
         const getFileExtension = (url) => {
@@ -172,8 +180,9 @@ export default function Table({ data: initialData = [], isLoading = false }) {
     return (
         <div className="apple-sheet relative overflow-hidden">
             <div className="overflow-x-auto">
-            <table className="w-full min-w-[964px] table-fixed text-left">
+            <table className="w-full min-w-[1064px] table-fixed text-left">
                 <colgroup>
+                    <col className="w-[140px]" />
                     <col className="w-[220px]" />
                     <col className="w-[104px]" />
                     <col className="w-[150px]" />
@@ -184,7 +193,8 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                 </colgroup>
                 <thead >
                     <tr className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl">
-                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">name</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">文件夹</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">文件名</th>
                         <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">preview</th>
                         <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">time</th>
                         <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">PV</th>
@@ -236,7 +246,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                         }}>
                         {data.length === 0 && (
                             <tr>
-                                <td colSpan={7} className="px-4 py-14 text-center text-sm font-medium text-slate-500">
+                                <td colSpan={8} className="px-4 py-14 text-center text-sm font-medium text-slate-500">
                                     {isLoading ? '正在加载数据...' : '暂无数据'}
                                 </td>
                             </tr>
@@ -247,7 +257,11 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                             <tr key={index} className="group h-28 transition hover:bg-white/38">
 
                                 <td onClick={() => handleNameClick(item)} className="cursor-pointer border-b border-white/45 px-4 py-3 text-center text-sm font-medium text-slate-700 transition group-hover:text-sky-700">
-                                    <div className="truncate" title={item.url}>{item.url}</div>
+                                    <div className="truncate" title={getFolderName(item)}>{getFolderName(item)}</div>
+                                </td>
+                                <td onClick={() => handleNameClick(item)} className="cursor-pointer border-b border-white/45 px-4 py-3 text-center text-sm font-medium text-slate-700 transition group-hover:text-sky-700">
+                                    <div className="truncate" title={getDisplayName(item)}>{getDisplayName(item)}</div>
+                                    <div className="mt-1 truncate text-[11px] font-normal text-slate-400" title={item.url}>{item.url}</div>
                                 </td>
                                 <td
                                     className="h-28 border-b border-white/45 px-4 py-3 text-sm text-slate-700"
@@ -334,7 +348,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                         <div className='mt-12 flex flex-col gap-2'>
                             {[
                                 { text: getImgUrl(modalData.url), onClick: () => handleCopy(getImgUrl(modalData.url)) },
-                                { text: `![${modalData.url}](${getImgUrl(modalData.url)})`, onClick: () => handleCopy(`![${modalData.name}](${getImgUrl(modalData.url)})`) },
+                                { text: `![${getDisplayName(modalData)}](${getImgUrl(modalData.url)})`, onClick: () => handleCopy(`![${getDisplayName(modalData)}](${getImgUrl(modalData.url)})`) },
                                 { text: `<a href="${getImgUrl(modalData.url)}" target="_blank"><img src="${getImgUrl(modalData.url)}"></a>`, onClick: () => handleCopy(`<a href="${getImgUrl(modalData.url)}" target="_blank"><img src="${getImgUrl(modalData.url)}"></a>`) },
                                 { text: `[img]${getImgUrl(modalData.url)}[/img]`, onClick: () => handleCopy(`[img]${getImgUrl(modalData.url)}[/img]`) },
                             ].map((item, i) => (

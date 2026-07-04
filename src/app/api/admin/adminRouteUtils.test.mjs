@@ -14,11 +14,11 @@ test('normalizes admin pagination and builds parameterized list search queries',
   assert.deepEqual(payload, { page: 2, offset: 20, query: "cat's" });
   assert.equal(
     queries.rows.sql,
-    'SELECT * FROM imginfo WHERE url LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?',
+    "SELECT * FROM imginfo WHERE url LIKE ? OR COALESCE(name, '') LIKE ? OR COALESCE(folder, '') LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?",
   );
-  assert.deepEqual(queries.rows.bindings, ["%cat's%", 10, 20]);
-  assert.equal(queries.total.sql, 'SELECT COUNT(*) as total FROM imginfo WHERE url LIKE ?');
-  assert.deepEqual(queries.total.bindings, ["%cat's%"]);
+  assert.deepEqual(queries.rows.bindings, ["%cat's%", "%cat's%", "%cat's%", 10, 20]);
+  assert.equal(queries.total.sql, "SELECT COUNT(*) as total FROM imginfo WHERE url LIKE ? OR COALESCE(name, '') LIKE ? OR COALESCE(folder, '') LIKE ?");
+  assert.deepEqual(queries.total.bindings, ["%cat's%", "%cat's%", "%cat's%"]);
 });
 
 test('builds parameterized log queries without string interpolation', () => {
@@ -27,7 +27,7 @@ test('builds parameterized log queries without string interpolation', () => {
   assert.equal(queries.rows.bindings.at(-1), 0);
   assert.equal(
     queries.rows.sql,
-    'SELECT tgimglog.*, imginfo.rating, imginfo.total FROM tgimglog JOIN imginfo ON tgimglog.url = imginfo.url ORDER BY tgimglog.id DESC LIMIT ? OFFSET ?',
+    'SELECT tgimglog.*, imginfo.rating, imginfo.total, imginfo.name, imginfo.folder FROM tgimglog JOIN imginfo ON tgimglog.url = imginfo.url ORDER BY tgimglog.id DESC LIMIT ? OFFSET ?',
   );
   assert.equal(queries.total.sql, 'SELECT COUNT(*) as total FROM tgimglog');
 });

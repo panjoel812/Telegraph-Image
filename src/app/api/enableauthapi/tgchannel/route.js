@@ -1,6 +1,11 @@
 export const runtime = 'edge';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
+import {
+	ensureImageInfoMetadataColumns,
+	normalizeDisplayName,
+	normalizeFolderName,
+} from '@/lib/imageMetadata';
 
 
 
@@ -31,7 +36,10 @@ export async function POST(request) {
 	const Referer = request.headers.get('Referer') || "Referer";
 
 	const formData = await request.formData();
-	const fileType = formData.get('file').type;
+	const uploadFile = formData.get('file');
+	const fileType = uploadFile.type;
+	const displayName = normalizeDisplayName(uploadFile.name, uploadFile.name || 'telegram-file');
+	const folderName = normalizeFolderName(formData.get('folder'));
 
 	const req_url = new URL(request.url);
 
@@ -53,7 +61,7 @@ export async function POST(request) {
 	const up_url = `https://api.telegram.org/bot${env.TG_BOT_TOKEN}/${endpoint}`;
 	let newformData = new FormData();
 	newformData.append("chat_id", env.TG_CHAT_ID);
-	newformData.append(fileTypevalue, formData.get('file'));
+	newformData.append(fileTypevalue, uploadFile, displayName);
 
 	try {
 		const res_img = await fetch(up_url, {
@@ -71,7 +79,8 @@ export async function POST(request) {
 		const data = {
 			"url": `${req_url.origin}/api/cfile/${fileData.file_id}`,
 			"code": 200,
-			"name": fileData.file_name
+			"name": displayName,
+			"folder": folderName
 		}
 		if (!imageDatabase) {
 			data.env_img = "null"
@@ -86,7 +95,8 @@ export async function POST(request) {
 			try {
 				const rating_index = await getRating(env, `${fileData.file_id}`);
 				const nowTime = await get_nowTime()
-				await insertImageData(imageDatabase, `/cfile/${fileData.file_id}`, Referer, clientIp, rating_index, nowTime);
+				await ensureImageInfoMetadataColumns(imageDatabase);
+				await insertImageData(imageDatabase, `/cfile/${fileData.file_id}`, Referer, clientIp, rating_index, nowTime, displayName, folderName);
 
 				return Response.json({
 					...data,
@@ -106,7 +116,8 @@ export async function POST(request) {
 			} catch (error) {
 				console.log(error);
 				const fallbackTime = await get_nowTime()
-				await insertImageData(imageDatabase, `/cfile/${fileData.file_id}`, Referer, clientIp, -1, fallbackTime);
+				await ensureImageInfoMetadataColumns(imageDatabase);
+				await insertImageData(imageDatabase, `/cfile/${fileData.file_id}`, Referer, clientIp, -1, fallbackTime, displayName, folderName);
 
 
 				return Response.json({
@@ -195,12 +206,12 @@ const getFile = async (response) => {
 
 
 
-async function insertImageData(env, src, referer, ip, rating, time) {
+async function insertImageData(env, src, referer, ip, rating, time, name, folder) {
 	try {
-		const instdata = await env.prepare(
-			`INSERT INTO imginfo (url, referer, ip, rating, total, time)
-           VALUES ('${src}', '${referer}', '${ip}', ${rating}, 1, '${time}')`
-		).run()
+		await env.prepare(
+			`INSERT INTO imginfo (url, referer, ip, rating, total, time, name, folder)
+           VALUES (?, ?, ?, ?, 1, ?, ?, ?)`
+		).bind(src, referer, ip, rating, time, name, folder).run()
 	} catch (error) {
 
 	};

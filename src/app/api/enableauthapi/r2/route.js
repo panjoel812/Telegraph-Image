@@ -1,6 +1,11 @@
 export const runtime = 'edge';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
+import {
+	ensureImageInfoMetadataColumns,
+	normalizeDisplayName,
+	normalizeFolderName,
+} from '@/lib/imageMetadata';
 
 
 
@@ -36,7 +41,8 @@ export async function POST(request) {
 
 	const formData = await request.formData();
 	const fileType = formData.get('file').type;
-	const filename = formData.get('file').name;
+	const filename = normalizeDisplayName(formData.get('file').name, formData.get('file').name || 'r2-file');
+	const folderName = normalizeFolderName(formData.get('folder'));
 	const file = formData.get('file');
 
 	const header = new Headers()
@@ -92,7 +98,8 @@ export async function POST(request) {
 			try {
 				const rating_index = await getRating(env, `${req_url.origin}/api/rfile/${filename}`);
 				const nowTime = await get_nowTime()
-				await insertImageData(imageDatabase, `/rfile/${filename}`, Referer, clientIp, rating_index, nowTime);
+				await ensureImageInfoMetadataColumns(imageDatabase);
+				await insertImageData(imageDatabase, `/rfile/${filename}`, Referer, clientIp, rating_index, nowTime, filename, folderName);
 
 				return Response.json({
 					...data,
@@ -110,7 +117,8 @@ export async function POST(request) {
 			} catch (error) {
 				console.log(error);
 				const fallbackTime = await get_nowTime()
-				await insertImageData(imageDatabase, `/rfile/${filename}`, Referer, clientIp, -1, fallbackTime);
+				await ensureImageInfoMetadataColumns(imageDatabase);
+				await insertImageData(imageDatabase, `/rfile/${filename}`, Referer, clientIp, -1, fallbackTime, filename, folderName);
 
 
 				return Response.json({
@@ -143,12 +151,12 @@ export async function POST(request) {
 
 
 
-async function insertImageData(env, src, referer, ip, rating, time) {
+async function insertImageData(env, src, referer, ip, rating, time, name, folder) {
 	try {
-		const instdata = await env.prepare(
-			`INSERT INTO imginfo (url, referer, ip, rating, total, time)
-           VALUES ('${src}', '${referer}', '${ip}', ${rating}, 1, '${time}')`
-		).run()
+		await env.prepare(
+			`INSERT INTO imginfo (url, referer, ip, rating, total, time, name, folder)
+           VALUES (?, ?, ?, ?, 1, ?, ?, ?)`
+		).bind(src, referer, ip, rating, time, name, folder).run()
 	} catch (error) {
 
 	};
