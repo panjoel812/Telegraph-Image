@@ -1,43 +1,42 @@
-
 import { getRequestContext } from '@cloudflare/next-on-pages';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400', // 24 hours
-  'Content-Type': 'application/json'
-};
+import { jsonHeaders } from '../adminRouteUtils';
 
 export const runtime = 'edge';
 
 export async function PUT(request) {
-  let { rating, name } = await request.json()
-  // 获取客户端的IP地址
-  const { env, cf, ctx } = getRequestContext();
-  // console.log(dd);
-
-
   try {
-    const setData = await env.IMG.prepare(`UPDATE imginfo SET rating = ${rating} WHERE url='${name}'`).run()
+    const { rating, name } = await request.json();
+    const { env } = getRequestContext();
+    const nextRating = Number(rating);
+
+    if (!env?.IMG) {
+      throw new Error('IMG D1 binding is not configured');
+    }
+
+    if (typeof name !== 'string' || !name.trim()) {
+      throw new Error('Missing image name');
+    }
+
+    if (![1, 3].includes(nextRating)) {
+      throw new Error('Invalid rating value');
+    }
+
+    const setData = await env.IMG.prepare('UPDATE imginfo SET rating = ? WHERE url = ?').bind(nextRating, name).run();
+
     return Response.json({
-      "code": 200,
-      "success": true,
-      "message": setData.success,
+      code: 200,
+      success: true,
+      message: setData.success ? 'success' : 'update completed',
     });
 
   } catch (error) {
     return Response.json({
-      "code": 500,
-      "success": false,
-      "message": error.message,
+      code: 500,
+      success: false,
+      message: error.message,
     }, {
       status: 500,
-      headers: corsHeaders,
+      headers: jsonHeaders,
     })
   }
-
 }
-
-
-
-

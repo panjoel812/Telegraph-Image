@@ -5,8 +5,9 @@ import React, { useRef } from 'react';
 import TooltipItem from '@/components/Tooltip';
 import FullScreenIcon from "@/components/FullScreenIcon"
 import { PhotoProvider, PhotoView } from 'react-photo-view';
+import { readAdminJson } from '@/lib/adminResponse';
 
-export default function Table({ data: initialData = [] }) {
+export default function Table({ data: initialData = [], isLoading = false }) {
 
     const [data, setData] = useState(initialData); // 初始化状态
     const [modalData, setModalData] = useState(null);
@@ -19,7 +20,6 @@ export default function Table({ data: initialData = [] }) {
     }, [initialData]);
 
     const handleClickOutside = (e) => {
-        console.log(modalRef.current.contains(e.target));
         if (modalRef.current && !modalRef.current.contains(e.target)) {
             setModalData(null);
         }
@@ -63,7 +63,7 @@ export default function Table({ data: initialData = [] }) {
                     name: initName,
                 }),
             });
-            const res_data = await res.json();
+            const res_data = await readAdminJson(res);
             if (res_data.success) {
                 toast.success('删除成功!');
                 setData(prevData => prevData.filter(item => item.url !== initName));
@@ -164,21 +164,22 @@ export default function Table({ data: initialData = [] }) {
 
     const elementSize = 400;
     return (
-        <div className="mx-2">
-            <table className="min-w-full bg-white  items-center justify-between ">
+        <div className="glass-panel overflow-hidden rounded-lg">
+            <div className="overflow-x-auto">
+            <table className="min-w-full items-center justify-between text-left">
                 <thead >
-                    <tr className="sticky top-0 bg-gray-100 z-20">
-                        <th className=" py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">name</th>
-                        <th className="sticky left-0 z-10 py-2 px-4 border-b border-gray-200 bg-gray-100 text-center text-sm font-semibold text-gray-600">preview</th>
-                        <th className=" py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">time</th>
-                        <th className=" py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">referer</th>
-                        <th className=" py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">ip</th>
-                        <th className=" py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">PV</th>
-                        <th className=" py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">rating</th>
-                        <th className="sticky  right-0 z-10 py-2 px-4 border-b border-gray-200 bg-gray-100  text-center text-sm font-semibold text-gray-600">限制访问</th>
+                    <tr className="sticky top-0 z-20 bg-white/65 backdrop-blur-xl">
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">name</th>
+                        <th className="sticky left-0 z-10 border-b border-white/60 bg-white/75 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 backdrop-blur-xl">preview</th>
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">time</th>
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">referer</th>
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">ip</th>
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">PV</th>
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">rating</th>
+                        <th className="sticky right-0 z-10 border-b border-white/60 bg-white/75 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 backdrop-blur-xl">限制访问</th>
                     </tr>
                 </thead>
-                <tbody >
+                <tbody className={isLoading ? 'opacity-60' : ''}>
 
                     <PhotoProvider
                         maskOpacity={0.5}
@@ -219,15 +220,23 @@ export default function Table({ data: initialData = [] }) {
                                 </>
                             );
                         }}>
+                        {data.length === 0 && (
+                            <tr>
+                                <td colSpan={8} className="px-4 py-14 text-center text-sm font-medium text-slate-500">
+                                    {isLoading ? '正在加载数据...' : '暂无数据'}
+                                </td>
+                            </tr>
+                        )}
+
                         {data.map((item, index) => (
 
-                            <tr key={index}>
+                            <tr key={index} className="group transition hover:bg-white/38">
 
-                                <td onClick={() => handleNameClick(item)} className="text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700 truncate max-w-48">
+                                <td onClick={() => handleNameClick(item)} className="max-w-64 cursor-pointer truncate border-b border-white/45 px-4 py-3 text-center text-sm font-medium text-slate-700 transition group-hover:text-sky-700">
                                     {item.url}
                                 </td>
                                 <td
-                                    className="w-20 h-20 sticky left-0 z-10   py-2 px-4 border-b border-gray-500 bg-white text-sm text-gray-700"
+                                    className="sticky left-0 z-10 h-24 w-24 border-b border-white/45 bg-white/62 px-4 py-3 text-sm text-slate-700 backdrop-blur-xl"
                                 >
 
                                     {
@@ -261,25 +270,25 @@ export default function Table({ data: initialData = [] }) {
                                     }
 
                                 </td>
-                                <td className="text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700 max-w-48">
+                                <td className="max-w-48 border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
                                     {item.time}
                                 </td>
-                                <td className="text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700 max-w-48 break-all">
+                                <td className="max-w-48 break-all border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
                                     <TooltipItem tooltipsText={item.referer} position="bottom" >{item.referer}</TooltipItem>
                                 </td>
-                                <td className="text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700 max-w-48 ">
+                                <td className="max-w-48 border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
                                     <TooltipItem tooltipsText={item.ip} position="bottom" >{item.ip}</TooltipItem>
                                 </td>
-                                <td className="text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700 max-w-2 ">{item.total}</td>
-                                <td className="text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700 max-w-2 ">{item.rating}</td>
-                                <td className="sticky  right-0 z-10 bg-white text-center py-2 px-4 border-b border-gray-200 text-sm text-gray-700">
+                                <td className="max-w-2 border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.total}</td>
+                                <td className="max-w-2 border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.rating}</td>
+                                <td className="sticky right-0 z-10 border-b border-white/45 bg-white/62 px-4 py-3 text-center text-sm text-slate-700 backdrop-blur-xl">
                                     <div className="flex flex-row justify-center">
                                         <Switcher initialChecked={item.rating} initName={item.url} />
                                         <button
                                             onClick={() => {
                                                 handleDelete(item.url)
                                             }}
-                                            className="ml-2 px-3 py-1 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                            className="glass-button-danger ml-2 rounded-lg px-3 py-1 text-sm font-semibold transition hover:-translate-y-px focus:outline-none focus:ring-2 focus:ring-red-300"
                                         >
                                             删除
                                         </button>
@@ -292,13 +301,14 @@ export default function Table({ data: initialData = [] }) {
                     </PhotoProvider>
                 </tbody>
             </table>
+            </div>
 
 
             {modalData && (
-                <div onClick={handleClickOutside} className="fixed z-50 inset-0 overflow-y-auto flex items-center justify-center m-5 ">
-                    <div className="fixed inset-0 bg-black opacity-75"></div>
-                    <div ref={modalRef} className="bg-white rounded-lg flex-none flex flex-col h-1/2 relative w-9/10 sm:w-9/10 md:w-96 lg:w-120 xl:w-144 2xl:w-160">
-                        <button className="absolute top-2 right-2 ring-2 text-red-600 hover:text-red-800" onClick={handleCloseModal}>
+                <div onClick={handleClickOutside} className="fixed inset-0 z-50 m-5 flex items-center justify-center overflow-y-auto">
+                    <div className="fixed inset-0 bg-slate-950/45 backdrop-blur-sm"></div>
+                    <div ref={modalRef} className="glass-panel relative flex h-1/2 w-9/10 flex-none flex-col rounded-lg sm:w-9/10 md:w-96 lg:w-120 xl:w-144 2xl:w-160">
+                        <button className="glass-button absolute right-2 top-2 rounded-lg p-1 text-red-600 hover:text-red-700" onClick={handleCloseModal}>
                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -315,7 +325,7 @@ export default function Table({ data: initialData = [] }) {
                                     readOnly
                                     value={item.text}
                                     onClick={item.onClick}
-                                    className="mx-2 px-3 my-1 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-800 focus:outline-none placeholder-gray-400"
+                                    className="glass-input mx-2 my-1 rounded-lg px-3 py-2 text-sm focus:outline-none"
                                 />
 
 

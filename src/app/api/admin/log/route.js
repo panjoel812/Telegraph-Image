@@ -1,63 +1,46 @@
-import { NextResponse } from "next/server";
-import { headers } from 'next/headers'
 import { getRequestContext } from '@cloudflare/next-on-pages';
-
-// ...
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400', // 24 hours
-  'Content-Type': 'application/json'
-};
+import {
+  bindStatement,
+  buildLogQueries,
+  getJsonErrorPayload,
+  jsonHeaders,
+  normalizeAdminPayload,
+} from '../adminRouteUtils';
 
 export const runtime = 'edge';
 export async function POST(request) {
-  // 获取客户端的IP地址
-  const { env, cf, ctx } = getRequestContext();
-  // console.log(dd);
-  try {
-    let { page, query } = await request.json()
+  let payload = normalizeAdminPayload();
 
-    if (query) {
-      const ps = env.IMG.prepare(`SELECT tgimglog.*, imginfo.rating,imginfo.total FROM tgimglog JOIN imginfo ON tgimglog.url = imginfo.url WHERE tgimglog.url LIKE '%${query}%' ORDER BY tgimglog.id DESC LIMIT 10 OFFSET ${page} * 10`);
-      const { results } = await ps.all()
-      const total = await env.IMG.prepare(`SELECT COUNT(*) as total FROM tgimglog WHERE url LIKE '%${query}%'`).first()
-      return Response.json({
-        "code": 200,
-        "success": true,
-        "message": "success",
-        "data": results,
-        "page": page,
-        "total": total.total
-      });
-    } else {
-      const ps = env.IMG.prepare(`SELECT tgimglog.*, imginfo.rating,imginfo.total FROM tgimglog JOIN imginfo ON tgimglog.url = imginfo.url ORDER BY tgimglog.id DESC LIMIT 10 OFFSET  ${page} * 10`);
-      const { results } = await ps.all()
-      const total = await env.IMG.prepare(`SELECT COUNT(*) as total FROM tgimglog`).first()
-      return Response.json({
-        "code": 200,
-        "success": true,
-        "message": "success",
-        "data": results,
-        "page": page,
-        "total": total.total
-      });
+  try {
+    payload = normalizeAdminPayload(await request.json());
+    const { env } = getRequestContext();
+
+    if (!env?.IMG) {
+      throw new Error('IMG D1 binding is not configured');
     }
-  } catch (error) {
+
+    const queries = buildLogQueries(payload);
+    const rowsStatement = bindStatement(env.IMG.prepare(queries.rows.sql), queries.rows.bindings);
+    const totalStatement = bindStatement(env.IMG.prepare(queries.total.sql), queries.total.bindings);
+    const [{ results = [] }, total] = await Promise.all([
+      rowsStatement.all(),
+      totalStatement.first(),
+    ]);
 
     return Response.json({
-      "code": 500,
-      "success": false,
-      "message": error.message,
-      "data": page,
+      code: 200,
+      success: true,
+      message: 'success',
+      data: results,
+      page: payload.page,
+      total: Number(total?.total || 0),
     }, {
+      headers: jsonHeaders,
+    });
+  } catch (error) {
+    return Response.json(getJsonErrorPayload(error, payload.page), {
       status: 500,
-      headers: corsHeaders,
+      headers: jsonHeaders,
     })
   }
-
 }
-
-
-

@@ -1,39 +1,37 @@
-
 import { getRequestContext } from '@cloudflare/next-on-pages';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400', // 24 hours
-  'Content-Type': 'application/json'
-};
+import { jsonHeaders } from '../adminRouteUtils';
 
 export const runtime = 'edge';
 
-
-
-
-
-
 export async function DELETE(request) {
-  let { name } = await request.json()
-  const { env, cf, ctx } = getRequestContext();
   try {
-    const setData = await env.IMG.prepare(`DELETE FROM imginfo WHERE url='${name}'`).run()
+    const { name } = await request.json();
+    const { env } = getRequestContext();
+
+    if (!env?.IMG) {
+      throw new Error('IMG D1 binding is not configured');
+    }
+
+    if (typeof name !== 'string' || !name.trim()) {
+      throw new Error('Missing image name');
+    }
+
+    const setData = await env.IMG.prepare('DELETE FROM imginfo WHERE url = ?').bind(name).run();
+
     return Response.json({
-      "code": 200,
-      "success": true,
-      "message": setData.success,
+      code: 200,
+      success: true,
+      message: setData.success ? 'success' : 'delete completed',
     });
 
   } catch (error) {
     return Response.json({
-      "code": 500,
-      "success": false,
-      "message": error.message,
+      code: 500,
+      success: false,
+      message: error.message,
     }, {
       status: 500,
-      headers: corsHeaders,
+      headers: jsonHeaders,
     })
   }
 }
