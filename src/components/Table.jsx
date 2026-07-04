@@ -11,6 +11,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
 
     const [data, setData] = useState(initialData); // 初始化状态
     const [modalData, setModalData] = useState(null);
+    const [pendingDelete, setPendingDelete] = useState(null);
     const modalRef = useRef(null);
 
 
@@ -76,11 +77,17 @@ export default function Table({ data: initialData = [], isLoading = false }) {
     };
 
 
-    const handleDelete = async (initName) => {
-        const confirmed = window.confirm('你确定要删除这个项目吗？');
-        if (confirmed) {
-            await deleteItem(initName);
+    const handleDelete = (initName) => {
+        setPendingDelete(initName);
+    };
+
+    const confirmDelete = async () => {
+        if (!pendingDelete) {
+            return;
         }
+        const target = pendingDelete;
+        setPendingDelete(null);
+        await deleteItem(target);
     };
 
 
@@ -164,13 +171,23 @@ export default function Table({ data: initialData = [], isLoading = false }) {
 
     const elementSize = 400;
     return (
-        <div className="glass-panel overflow-hidden rounded-lg">
+        <div className="glass-panel relative overflow-hidden rounded-lg">
             <div className="overflow-x-auto">
-            <table className="min-w-full items-center justify-between text-left">
+            <table className="min-w-[1104px] table-fixed text-left">
+                <colgroup>
+                    <col className="w-[220px]" />
+                    <col className="w-[104px]" />
+                    <col className="w-[140px]" />
+                    <col className="w-[220px]" />
+                    <col className="w-[140px]" />
+                    <col className="w-[60px]" />
+                    <col className="w-[70px]" />
+                    <col className="w-[150px]" />
+                </colgroup>
                 <thead >
                     <tr className="sticky top-0 z-20 bg-white/65 backdrop-blur-xl">
                         <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">name</th>
-                        <th className="sticky left-0 z-10 border-b border-white/60 bg-white/75 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 backdrop-blur-xl">preview</th>
+                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">preview</th>
                         <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">time</th>
                         <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">referer</th>
                         <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">ip</th>
@@ -230,14 +247,15 @@ export default function Table({ data: initialData = [], isLoading = false }) {
 
                         {data.map((item, index) => (
 
-                            <tr key={index} className="group transition hover:bg-white/38">
+                            <tr key={index} className="group h-28 transition hover:bg-white/38">
 
-                                <td onClick={() => handleNameClick(item)} className="max-w-64 cursor-pointer truncate border-b border-white/45 px-4 py-3 text-center text-sm font-medium text-slate-700 transition group-hover:text-sky-700">
-                                    {item.url}
+                                <td onClick={() => handleNameClick(item)} className="cursor-pointer border-b border-white/45 px-4 py-3 text-center text-sm font-medium text-slate-700 transition group-hover:text-sky-700">
+                                    <div className="truncate" title={item.url}>{item.url}</div>
                                 </td>
                                 <td
-                                    className="sticky left-0 z-10 h-24 w-24 border-b border-white/45 bg-white/62 px-4 py-3 text-sm text-slate-700 backdrop-blur-xl"
+                                    className="h-28 border-b border-white/45 px-4 py-3 text-sm text-slate-700"
                                 >
+                                    <div className="mx-auto h-16 w-20 overflow-hidden rounded-md bg-white/60 shadow-sm ring-1 ring-white/70">
 
                                     {
                                         isVideo(getImgUrl(item.url)) ? (
@@ -268,27 +286,28 @@ export default function Table({ data: initialData = [], isLoading = false }) {
 
                                         )
                                     }
+                                    </div>
 
                                 </td>
-                                <td className="max-w-48 border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
-                                    {item.time}
+                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm leading-5 text-slate-600">
+                                    <div className="line-clamp-2">{item.time}</div>
                                 </td>
-                                <td className="max-w-48 break-all border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
+                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
                                     <TooltipItem tooltipsText={item.referer} position="bottom" >{item.referer}</TooltipItem>
                                 </td>
-                                <td className="max-w-48 border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
+                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
                                     <TooltipItem tooltipsText={item.ip} position="bottom" >{item.ip}</TooltipItem>
                                 </td>
-                                <td className="max-w-2 border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.total}</td>
-                                <td className="max-w-2 border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.rating}</td>
-                                <td className="sticky right-0 z-10 border-b border-white/45 bg-white/62 px-4 py-3 text-center text-sm text-slate-700 backdrop-blur-xl">
-                                    <div className="flex flex-row justify-center">
+                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.total}</td>
+                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.rating}</td>
+                                <td className="sticky right-0 z-10 border-b border-white/45 bg-white/76 px-4 py-3 text-center text-sm text-slate-700 backdrop-blur-xl">
+                                    <div className="flex items-center justify-center gap-3">
                                         <Switcher initialChecked={item.rating} initName={item.url} />
                                         <button
                                             onClick={() => {
                                                 handleDelete(item.url)
                                             }}
-                                            className="glass-button-danger ml-2 rounded-lg px-3 py-1 text-sm font-semibold transition hover:-translate-y-px focus:outline-none focus:ring-2 focus:ring-red-300"
+                                            className="glass-button-danger min-w-[56px] whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold leading-none transition hover:-translate-y-px focus:outline-none focus:ring-2 focus:ring-red-300"
                                         >
                                             删除
                                         </button>
@@ -336,6 +355,36 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                 </div>
 
 
+            )}
+
+            {pendingDelete && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/30 p-6 backdrop-blur-sm">
+                    <div className="liquid-alert w-[min(300px,calc(100vw-32px))]">
+                        <div className="px-1">
+                            <h2 className="text-[13px] font-bold leading-4 text-black/85">确认删除</h2>
+                            <p className="mt-2 text-[11px] leading-[14px] text-black/75">
+                                删除后这条图片记录将从管理后台移除。请确认你要删除该文件。
+                            </p>
+                            <p className="mt-2 truncate text-[11px] font-semibold leading-[14px] text-black/50" title={pendingDelete}>
+                                {pendingDelete}
+                            </p>
+                        </div>
+                        <div className="mt-4 flex flex-col gap-2">
+                            <button
+                                className="liquid-alert-button liquid-alert-button-danger"
+                                onClick={confirmDelete}
+                            >
+                                删除
+                            </button>
+                            <button
+                                className="liquid-alert-button liquid-alert-button-muted"
+                                onClick={() => setPendingDelete(null)}
+                            >
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
         </div>

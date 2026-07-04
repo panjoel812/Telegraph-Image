@@ -15,7 +15,7 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 const LoginButton = ({ onClick, href, children }) => (
   <button
     onClick={onClick}
-    className="px-4 py-2 mx-2 w-28 sm:w-28 md:w-20 lg:w-16 xl:w-16 2xl:w-20 bg-blue-500 text-white rounded"
+    className="glass-button-primary rounded-lg px-5 py-2 text-sm font-semibold shadow-sm transition hover:-translate-y-px"
   >
     {children}
   </button>
@@ -46,19 +46,21 @@ export default function Home() {
 
 
 
-  let headers = {
+  const headers = {
 
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
 
   }
-  useEffect(() => {
-    ip();
-    getTotal();
-    isAuth();
 
-
+  const readJsonResponse = useCallback(async (res) => {
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      return null;
+    }
+    return res.json();
   }, []);
-  const ip = async () => {
+
+  const ip = useCallback(async () => {
     try {
 
       const res = await fetch(`/api/ip`, {
@@ -68,16 +70,19 @@ export default function Home() {
         }
 
       });
-      const data = await res.json();
-      setIP(data.ip);
+      const data = await readJsonResponse(res);
+      if (data?.ip) {
+        setIP(data.ip);
+      }
 
 
 
     } catch (error) {
-      console.error('请求出错:', error);
+      console.warn('请求出错:', error);
     }
-  };
-  const isAuth = async () => {
+  }, [readJsonResponse]);
+
+  const isAuth = useCallback(async () => {
     try {
 
       const res = await fetch(`/api/enableauthapi/isauth`, {
@@ -89,9 +94,9 @@ export default function Home() {
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const data = await readJsonResponse(res);
         setisAuthapi(true)
-        setLoginuser(data.role)
+        setLoginuser(data?.role)
 
       } else {
         setisAuthapi(false)
@@ -101,11 +106,11 @@ export default function Home() {
 
 
     } catch (error) {
-      console.error('请求出错:', error);
+      console.warn('请求出错:', error);
     }
-  };
+  }, [readJsonResponse]);
 
-  const getTotal = async () => {
+  const getTotal = useCallback(async () => {
     try {
 
       const res = await fetch(`/api/total`, {
@@ -115,15 +120,23 @@ export default function Home() {
         }
 
       });
-      const data = await res.json();
-      setTotal(data.total);
+      const data = await readJsonResponse(res);
+      if (data?.total !== undefined) {
+        setTotal(data.total);
+      }
 
 
 
     } catch (error) {
-      console.error('请求出错:', error);
+      console.warn('请求出错:', error);
     }
-  }
+  }, [readJsonResponse]);
+
+  useEffect(() => {
+    ip();
+    getTotal();
+    isAuth();
+  }, [getTotal, ip, isAuth]);
 
   const handleFileChange = (event) => {
     const newFiles = event.target.files;
@@ -139,7 +152,6 @@ export default function Home() {
 
   const handleClear = () => {
     setSelectedFiles([]);
-    setUploadStatus('');
     // setUploadedImages([]);
   };
 
@@ -376,11 +388,11 @@ export default function Home() {
     switch (activeTab) {
       case 'preview':
         return (
-          <div className=" flex flex-col ">
+          <div className="flex flex-col gap-3">
             {uploadedImages.map((data, index) => (
-              <div key={index} className="m-2 rounded-2xl ring-offset-2 ring-2  ring-slate-100 flex flex-row ">
+              <div key={index} className="glass-panel flex flex-col gap-4 rounded-lg p-3 md:flex-row">
                 {renderFile(data, index)}
-                <div className="flex flex-col justify-center w-4/5">
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
                   {[
                     { text: data.url, onClick: () => handleCopy(data.url) },
                     { text: `![${data.name}](${data.url})`, onClick: () => handleCopy(`![${data.name}](${data.url})`) },
@@ -392,7 +404,7 @@ export default function Home() {
                       readOnly
                       value={item.text}
                       onClick={item.onClick}
-                      className="px-3 my-1 py-2 border border-gray-300 rounded-lg bg-white text-sm text-gray-800 focus:outline-none placeholder-gray-400"
+                      className="glass-input rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none"
                     />
                   ))}
                 </div>
@@ -403,7 +415,7 @@ export default function Home() {
         );
       case 'htmlLinks':
         return (
-          <div ref={parentRef} className=" p-4 bg-slate-100  " onClick={handleCopyCode}>
+          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2 ">
                 <code className=" w-2 break-all">{`<img src="${data.url}" alt="${data.name}" />`}</code>
@@ -413,7 +425,7 @@ export default function Home() {
         );
       case 'markdownLinks':
         return (
-          <div ref={parentRef} className=" p-4 bg-slate-100  " onClick={handleCopyCode}>
+          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
                 <code className=" w-2 break-all">{`![${data.name}](${data.url})`}</code>
@@ -423,7 +435,7 @@ export default function Home() {
         );
       case 'bbcodeLinks':
         return (
-          <div ref={parentRef} className=" p-4 bg-slate-100  " onClick={handleCopyCode}>
+          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
                 <code className=" w-2 break-all">{`[img]${data.url}[/img]`}</code>
@@ -433,7 +445,7 @@ export default function Home() {
         );
       case 'viewLinks':
         return (
-          <div ref={parentRef} className=" p-4 bg-slate-100  " onClick={handleCopyCode}>
+          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
                 <code className=" w-2 break-all">{`${data.url}`}</code>
@@ -483,115 +495,113 @@ export default function Home() {
 
 
   return (
-    <main className=" overflow-auto h-full flex w-full min-h-screen flex-col items-center justify-between">
-      <header className="fixed top-0 h-[50px] left-0 w-full border-b bg-white flex z-50 justify-center items-center">
-        <nav className="flex justify-between items-center w-full max-w-4xl px-4">图床</nav>
-        {renderButton()}
+    <main className="liquid-page min-h-screen overflow-x-hidden px-4 pb-24 pt-24 text-slate-900 sm:px-6 lg:px-8">
+      <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
+        <nav className="glass-bar flex h-14 w-full max-w-6xl items-center justify-between rounded-lg px-4">
+          <Link href="/" className="flex items-center gap-3 text-base font-bold text-slate-900">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/70 text-sky-600 shadow-sm">
+              <FontAwesomeIcon icon={faImages} className="h-4 w-4" />
+            </span>
+            图床
+          </Link>
+          {renderButton()}
+        </nav>
       </header>
-      <div className="mt-[60px] w-9/10 sm:w-9/10 md:w-9/10 lg:w-9/10 xl:w-3/5 2xl:w-2/3">
 
-        <div className="flex flex-row">
-          <div className="flex flex-col">
-            <div className="text-gray-800 text-lg">图片或视频上传
+      <section className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-5">
+        <div className="glass-panel rounded-lg p-4 sm:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold tracking-normal text-slate-950">图片或视频上传</h1>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                上传文件最大 5 MB；本站已托管 <span className="font-semibold text-sky-600">{Total}</span> 张图片；你的 IP 是 <span className="font-semibold text-sky-600">{IP}</span>
+              </p>
             </div>
-            <div className="mb-4 text-sm text-gray-500">
-              上传文件最大 5 MB;本站已托管 <span className="text-cyan-600">{Total}</span> 张图片; 你访问本站的IP是：<span className="text-cyan-600">{IP}</span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="text-sm font-semibold text-slate-600">上传接口</span>
+              <select
+                value={selectedOption}
+                onChange={handleSelectChange}
+                className="glass-input h-12 min-w-40 rounded-lg px-4 text-base font-semibold text-slate-900 outline-none"
+              >
+                <option value="tg">TG(会失效)</option>
+                <option value="tgchannel">TG_Channel</option>
+                <option value="r2">R2</option>
+                <option value="58img">58img</option>
+              </select>
             </div>
           </div>
-          <div className="flex  flex-col sm:flex-col   md:w-auto lg:flex-row xl:flex-row  2xl:flex-row  mx-auto items-center  ">
-            <span className=" text-lg sm:text-sm   md:text-sm lg:text-xl xl:text-xl  2xl:text-xl">上传接口：</span>
-            <select
-              value={selectedOption} // 将选择框的值绑定到状态中的 selectedOption
-              onChange={handleSelectChange} // 当选择框的值发生变化时触发 handleSelectChange 函数
-              className="text-lg p-2 border  rounded text-center w-auto sm:w-auto md:w-auto lg:w-auto xl:w-auto  2xl:w-36">
-              <option value="tg" >TG(会失效)</option>
-              <option value="tgchannel">TG_Channel</option>
-              <option value="r2">R2</option>
-              {/* <option value="vviptuangou">vviptuangou</option> */}
-              <option value="58img">58img</option>
-              {/* <option value="tencent">tencent</option> */}
 
-            </select>
-          </div>
-
-
-        </div>
-        <div
-          className="border-2 border-dashed border-slate-400 rounded-md relative"
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onPaste={handlePaste}
-          style={{ minHeight: calculateMinHeight() }} // 动态设置最小高度
-        >
-          <div className="flex flex-wrap gap-3 min-h-[240px]">
+          <div
+            className="liquid-dropzone relative mt-5 overflow-hidden rounded-lg"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onPaste={handlePaste}
+            style={{ minHeight: selectedFiles.length > 0 ? calculateMinHeight() : '300px' }}
+          >
             <LoadingOverlay loading={uploading} />
-            {selectedFiles.map((file, index) => (
-              <div key={index} className="relative rounded-2xl w-44 h-48 ring-offset-2 ring-2  mx-3 my-3 flex flex-col items-center">
-                <div className="relative w-36 h-36 " onClick={() => handleImageClick(index)}>
-                  {file.type.startsWith('image/') && (
-                    <Image
-                      src={URL.createObjectURL(file)}
-                      alt={`Preview ${file.name}`}
-                      fill={true}
-                    />
-                  )}
-                  {file.type.startsWith('video/') && (
-                    <video
-                      src={URL.createObjectURL(file)}
-                      controls
-                      className="w-full h-full"
-                    />
-                  )}
-                  {!file.type.startsWith('image/') && !file.type.startsWith('video/') && (
-                    <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-700">
-                      <p>{file.name}</p>
+            <div className="grid min-h-[300px] grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="liquid-file-card flex h-56 flex-col rounded-lg p-3">
+                  <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg bg-white/60" onClick={() => handleImageClick(index)}>
+                    {file.type.startsWith('image/') && (
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${file.name}`}
+                        fill={true}
+                        className="object-cover"
+                      />
+                    )}
+                    {file.type.startsWith('video/') && (
+                      <video
+                        src={URL.createObjectURL(file)}
+                        controls
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                    {!file.type.startsWith('image/') && !file.type.startsWith('video/') && (
+                      <div className="flex h-full w-full items-center justify-center bg-white/60 p-4 text-center text-sm font-semibold text-slate-600">
+                        <p className="break-all">{file.name}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <p className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-600" title={file.name}>{file.name}</p>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button className="liquid-icon-button text-sky-600" onClick={() => handleImageClick(index)} aria-label="预览">
+                        <FontAwesomeIcon icon={faSearchPlus} />
+                      </button>
+                      <button className="liquid-icon-button text-red-500" onClick={() => handleRemoveImage(index)} aria-label="移除">
+                        <FontAwesomeIcon icon={faTrashAlt} />
+                      </button>
+                      <button className="liquid-icon-button text-emerald-600" onClick={() => handleUpload(file)} aria-label="上传">
+                        <FontAwesomeIcon icon={faUpload} />
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
-                <div className="flex flex-row items-center  justify-center w-full mt-3">
-                  <button
-                    className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer mx-2"
-                    onClick={() => handleImageClick(index)}
-                  >
-                    <FontAwesomeIcon icon={faSearchPlus} />
-                  </button>
-                  <button
-                    className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer mx-2"
-                    onClick={() => handleRemoveImage(index)}
-                  >
-                    <FontAwesomeIcon icon={faTrashAlt} />
-                  </button>
-                  <button
-                    className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer mx-2"
+              ))}
 
-                    onClick={() => handleUpload(file)}
-                  >
-                    <FontAwesomeIcon icon={faUpload} />
-                  </button>
+              {selectedFiles.length === 0 && (
+                <div className="col-span-full flex min-h-[300px] flex-col items-center justify-center gap-4 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-white/68 text-sky-600 shadow-sm ring-1 ring-white/75">
+                    <FontAwesomeIcon icon={faUpload} className="h-7 w-7" />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-slate-700">拖拽文件到这里上传</p>
+                    <p className="mt-1 text-sm text-slate-500">也可以粘贴屏幕截图，或使用下方按钮选择图片</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-
-
-            {selectedFiles.length === 0 && (
-              <div className="absolute -z-10 left-0 top-0 w-full h-full flex items-center justify-center">
-
-                <div className="text-gray-500">
-
-                  拖拽文件到这里或将屏幕截图复制并粘贴到此处上传
-                </div>
-              </div>
-            )}
-
+              )}
+            </div>
           </div>
-        </div>
-        <div className="w-full rounded-md shadow-sm overflow-hidden mt-4 grid grid-cols-8">
-          <div className="md:col-span-1 col-span-8">
+
+          <div className="glass-bar mt-4 grid grid-cols-1 gap-3 rounded-lg p-3 md:grid-cols-[auto_1fr_auto_auto] md:items-center">
             <label
               htmlFor="file-upload"
-              className="w-full h-10 bg-blue-500 cursor-pointer flex items-center justify-center text-white"
+              className="glass-button-primary flex h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:-translate-y-px"
             >
-              <FontAwesomeIcon icon={faImages} style={{ width: '20px', height: '20px' }} className="mr-2" />
+              <FontAwesomeIcon icon={faImages} className="h-4 w-4" />
               选择图片
             </label>
             <input
@@ -601,79 +611,58 @@ export default function Home() {
               onChange={handleFileChange}
               multiple
             />
-          </div>
-          <div className="md:col-span-5 col-span-8">
-            <div className="w-full h-10 bg-slate-200 leading-10 px-4 text-center md:text-left">
+            <div className="glass-input flex h-11 items-center rounded-lg px-4 text-sm font-semibold text-slate-600">
               已选择 {selectedFiles.length} 张，共 {getTotalSizeInMB(selectedFiles)} M
             </div>
-          </div>
-          <div className="md:col-span-1 col-span-3">
-            <div
-              className="w-full bg-red-500 cursor-pointer h-10 flex items-center justify-center text-white"
+            <button
+              className="glass-button-danger flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:-translate-y-px"
               onClick={handleClear}
             >
-              <FontAwesomeIcon icon={faTrashAlt} style={{ width: '20px', height: '20px' }} className="mr-2" />
+              <FontAwesomeIcon icon={faTrashAlt} className="h-4 w-4" />
               清除
-            </div>
-          </div>
-          <div className="md:col-span-1 col-span-5">
-            <div
-              className={`w-full bg-green-500 cursor-pointer h-10 flex items-center justify-center text-white ${uploading ? 'pointer-events-none opacity-50' : ''}`}
-              // className={`bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer mx-2 ${uploading ? 'pointer-events-none opacity-50' : ''}`}
-
+            </button>
+            <button
+              className={`glass-button-primary flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition hover:-translate-y-px ${uploading ? 'pointer-events-none opacity-50' : ''}`}
               onClick={() => handleUpload()}
             >
-              <FontAwesomeIcon icon={faUpload} style={{ width: '20px', height: '20px' }} className="mr-2" />
+              <FontAwesomeIcon icon={faUpload} className="h-4 w-4" />
               上传
-            </div>
+            </button>
           </div>
         </div>
 
-
         <ToastContainer />
-        <div className="w-full mt-4 min-h-[200px] mb-[60px] ">
-
-          {
-            uploadedImages.length > 0 && (<>
-              <div className="flex flex-wrap gap-3 mb-4 border-b border-gray-300 ">
-                <button
-                  onClick={() => setActiveTab('preview')}
-                  className={`px-4 py-2 ${activeTab === 'preview' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                  Preview
-                </button>
-                <button
-                  onClick={() => setActiveTab('htmlLinks')}
-                  className={`px-4 py-2 ${activeTab === 'htmlLinks' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                  HTML
-                </button>
-                <button
-                  onClick={() => setActiveTab('markdownLinks')}
-                  className={`px-4 py-2 ${activeTab === 'markdownLinks' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                  Markdown
-                </button>
-                <button
-                  onClick={() => setActiveTab('bbcodeLinks')}
-                  className={`px-4 py-2 ${activeTab === 'bbcodeLinks' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                  BBCode
-                </button>
-                <button
-                  onClick={() => setActiveTab('viewLinks')}
-                  className={`px-4 py-2 ${activeTab === 'viewLinks' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                  Links
-                </button>
+        <div className="min-h-[180px]">
+          {uploadedImages.length > 0 && (
+            <>
+              <div className="glass-bar mb-4 flex flex-wrap gap-2 rounded-lg p-2">
+                {[
+                  ['preview', 'Preview'],
+                  ['htmlLinks', 'HTML'],
+                  ['markdownLinks', 'Markdown'],
+                  ['bbcodeLinks', 'BBCode'],
+                  ['viewLinks', 'Links'],
+                ].map(([tab, label]) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === tab ? 'glass-button-primary' : 'glass-button'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
               {renderTabContent()}
             </>
-            )
-          }
+          )}
         </div>
+      </section>
 
-      </div>
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={handleCloseImage}>
-          <div className="relative flex flex-col items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-5 backdrop-blur-sm" onClick={handleCloseImage}>
+          <div className="glass-panel relative flex max-h-[86vh] max-w-[92vw] flex-col items-center justify-between rounded-lg p-3">
             <button
-              className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center"
+              className="glass-button-danger absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-lg leading-none"
               onClick={handleCloseImage}
             >
               &times;
@@ -685,33 +674,31 @@ export default function Home() {
                 alt="Selected"
                 width={500}
                 height={500}
-                className="object-cover w-9/10  h-auto rounded-lg"
+                className="max-h-[80vh] w-auto max-w-full rounded-lg object-contain"
               />
             ) : boxType === "video" ? (
               <video
                 src={selectedImage}
                 width={500}
                 height={500}
-                className="object-cover w-9/10  h-auto rounded-lg"
+                className="max-h-[80vh] w-auto max-w-full rounded-lg object-contain"
                 controls
               />
             ) : boxType === "other" ? (
-              // 这里可以渲染你想要的其他内容或组件
-              <div className="p-4 bg-white text-black rounded">
+              <div className="glass-panel rounded-lg p-4 text-slate-800">
                 <p>Unsupported file type</p>
               </div>
             ) : (
-              // 你可以选择一个默认的内容或者返回 null
               <div>未知类型</div>
             )}
           </div>
-
         </div>
-
       )}
 
-      <div className="fixed inset-x-0 bottom-0 h-[50px] bg-slate-200  w-full  flex  z-50 justify-center items-center ">
-        <Footer />
+      <div className="relative z-10 mx-auto mt-8 flex w-full max-w-6xl justify-center">
+        <div className="glass-bar flex h-12 w-full max-w-6xl items-center justify-center rounded-lg px-4 text-xs text-slate-500">
+          <Footer />
+        </div>
       </div>
     </main>
   );
