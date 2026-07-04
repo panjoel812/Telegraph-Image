@@ -64,10 +64,10 @@ const Switcher = ({ initialChecked, initName }) => {
         disabled={!isDisabled}
       />
       <span
-        className={`slider mr-3 flex h-[26px] w-[50px] items-center rounded-full border border-white/60 p-1 shadow-inner duration-200 ${isChecked ? 'bg-sky-500/90' : 'bg-slate-300/80'} ${!isDisabled ? 'opacity-45' : ''}`}
+        className={`slider flex h-4 w-9 items-center rounded-full p-[2px] duration-200 ${isChecked ? 'bg-[#0D6FFF]/25' : 'bg-black/[0.08]'} ${!isDisabled ? 'opacity-45' : ''}`}
       >
         <span
-          className={`dot h-[18px] w-[18px] rounded-full bg-white shadow-sm duration-200 ${isChecked ? 'translate-x-6' : ''}`}
+          className={`dot h-[13px] w-[21px] rounded-full bg-white/90 shadow-[0_0_1px_rgba(0,0,0,0.05),0_0_4px_rgba(0,0,0,0.08),0_4px_16px_rgba(0,0,0,0.10),inset_1.75px_1.75px_1px_-1px_#fff,inset_-1.75px_-1.75px_2px_-1px_#fff] duration-200 ${isChecked ? 'translate-x-[11px]' : ''}`}
         ></span>
       </span>
 

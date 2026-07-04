@@ -15,7 +15,7 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 const LoginButton = ({ onClick, href, children }) => (
   <button
     onClick={onClick}
-    className="glass-button-primary rounded-lg px-5 py-2 text-sm font-semibold shadow-sm transition hover:-translate-y-px"
+    className="apple-button apple-button-primary"
   >
     {children}
   </button>
@@ -40,6 +40,40 @@ export default function Home() {
 
 
   const parentRef = useRef(null);
+
+  const getDisplayName = (file) => file.displayName || file.name;
+
+  const normalizeFileName = (name, fallback) => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return fallback;
+    }
+
+    const cleaned = trimmed.replace(/[\\/:*?"<>|]/g, "-");
+    const fallbackExt = fallback.includes(".") ? fallback.slice(fallback.lastIndexOf(".")) : "";
+    return cleaned.includes(".") || !fallbackExt ? cleaned : `${cleaned}${fallbackExt}`;
+  };
+
+  const updateFileName = (targetIndex, name) => {
+    setSelectedFiles((prevFiles) => prevFiles.map((file, index) => {
+      if (index !== targetIndex) {
+        return file;
+      }
+
+      file.displayName = name;
+      return file;
+    }));
+  };
+
+  const buildUploadFile = (file) => {
+    const uploadName = normalizeFileName(getDisplayName(file), file.name);
+    return uploadName === file.name
+      ? file
+      : new File([file], uploadName, {
+        type: file.type,
+        lastModified: file.lastModified,
+      });
+  };
 
 
 
@@ -141,10 +175,10 @@ export default function Home() {
   const handleFileChange = (event) => {
     const newFiles = event.target.files;
     const filteredFiles = Array.from(newFiles).filter(file =>
-      !selectedFiles.find(selFile => selFile.name === file.name));
+      !selectedFiles.find(selFile => getDisplayName(selFile) === file.name));
     // 过滤掉已经在 uploadedImages 数组中存在的文件
     const uniqueFiles = filteredFiles.filter(file =>
-      !uploadedImages.find(upImg => upImg.name === file.name)
+      !uploadedImages.find(upImg => getDisplayName(upImg) === file.name)
     );
 
     setSelectedFiles([...selectedFiles, ...uniqueFiles]);
@@ -179,8 +213,10 @@ export default function Home() {
     try {
       for (const file of filesToUpload) {
         const formData = new FormData();
+        const uploadFile = buildUploadFile(file);
+        const uploadName = uploadFile.name;
 
-        formData.append(formFieldName, file);
+        formData.append(formFieldName, uploadFile, uploadName);
 
         try {
           const targetUrl = selectedOption === "tgchannel" || selectedOption === "r2"
@@ -199,6 +235,7 @@ export default function Home() {
             // console.log(result);
 
             file.url = result.url;
+            file.displayName = uploadName;
 
             // 更新 uploadedImages 和 selectedFiles
             setUploadedImages((prevImages) => [...prevImages, file]);
@@ -209,10 +246,10 @@ export default function Home() {
             let errorMsg;
             try {
               const errorData = await response.json();
-              errorMsg = errorData.message || `上传 ${file.name} 图片时出错`;
+              errorMsg = errorData.message || `上传 ${uploadName} 图片时出错`;
             } catch (jsonError) {
               // 如果解析 JSON 失败，使用默认错误信息
-              errorMsg = `上传 ${file.name} 图片时发生未知错误`;
+              errorMsg = `上传 ${uploadName} 图片时发生未知错误`;
             }
 
             // 细化状态码处理
@@ -233,11 +270,11 @@ export default function Home() {
                 toast.error(`未授权: ${errorMsg}`);
                 break;
               default:
-                toast.error(`上传 ${file.name} 图片时出错: ${errorMsg}`);
+                toast.error(`上传 ${uploadName} 图片时出错: ${errorMsg}`);
             }
           }
         } catch (error) {
-          toast.error(`上传 ${file.name} 图片时出错`);
+          toast.error(`上传 ${getDisplayName(file)} 图片时出错`);
         }
       }
 
@@ -274,7 +311,7 @@ export default function Home() {
     const files = event.dataTransfer.files;
 
     if (files.length > 0) {
-      const filteredFiles = Array.from(files).filter(file => !selectedFiles.find(selFile => selFile.name === file.name));
+      const filteredFiles = Array.from(files).filter(file => !selectedFiles.find(selFile => getDisplayName(selFile) === file.name));
       setSelectedFiles([...selectedFiles, ...filteredFiles]);
     }
   };
@@ -395,7 +432,7 @@ export default function Home() {
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
                   {[
                     { text: data.url, onClick: () => handleCopy(data.url) },
-                    { text: `![${data.name}](${data.url})`, onClick: () => handleCopy(`![${data.name}](${data.url})`) },
+                    { text: `![${getDisplayName(data)}](${data.url})`, onClick: () => handleCopy(`![${getDisplayName(data)}](${data.url})`) },
                     { text: `<a href="${data.url}" target="_blank"><img src="${data.url}"></a>`, onClick: () => handleCopy(`<a href="${data.url}" target="_blank"><img src="${data.url}"></a>`) },
                     { text: `[img]${data.url}[/img]`, onClick: () => handleCopy(`[img]${data.url}[/img]`) },
                   ].map((item, i) => (
@@ -418,7 +455,7 @@ export default function Home() {
           <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2 ">
-                <code className=" w-2 break-all">{`<img src="${data.url}" alt="${data.name}" />`}</code>
+                <code className=" w-2 break-all">{`<img src="${data.url}" alt="${getDisplayName(data)}" />`}</code>
               </div>
             ))}
           </div >
@@ -428,7 +465,7 @@ export default function Home() {
           <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
-                <code className=" w-2 break-all">{`![${data.name}](${data.url})`}</code>
+                <code className=" w-2 break-all">{`![${getDisplayName(data)}](${data.url})`}</code>
               </div>
             ))}
           </div>
@@ -497,7 +534,7 @@ export default function Home() {
   return (
     <main className="liquid-page min-h-screen overflow-x-hidden px-4 pb-24 pt-24 text-slate-900 sm:px-6 lg:px-8">
       <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-        <nav className="glass-bar flex h-14 w-full max-w-6xl items-center justify-between rounded-lg px-4">
+        <nav className="glass-bar flex h-14 w-full max-w-6xl items-center justify-between rounded-[16px] px-4">
           <Link href="/" className="flex items-center gap-3 text-base font-bold text-slate-900">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/70 text-sky-600 shadow-sm">
               <FontAwesomeIcon icon={faImages} className="h-4 w-4" />
@@ -509,7 +546,7 @@ export default function Home() {
       </header>
 
       <section className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-5">
-        <div className="glass-panel rounded-lg p-4 sm:p-5">
+        <div className="apple-sheet p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <h1 className="text-2xl font-bold tracking-normal text-slate-950">图片或视频上传</h1>
@@ -522,7 +559,7 @@ export default function Home() {
               <select
                 value={selectedOption}
                 onChange={handleSelectChange}
-                className="glass-input h-12 min-w-40 rounded-lg px-4 text-base font-semibold text-slate-900 outline-none"
+                className="apple-popup h-9 min-w-40 px-3"
               >
                 <option value="tg">TG(会失效)</option>
                 <option value="tgchannel">TG_Channel</option>
@@ -533,7 +570,7 @@ export default function Home() {
           </div>
 
           <div
-            className="liquid-dropzone relative mt-5 overflow-hidden rounded-lg"
+            className="liquid-dropzone relative mt-5 overflow-hidden rounded-[16px]"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onPaste={handlePaste}
@@ -542,12 +579,12 @@ export default function Home() {
             <LoadingOverlay loading={uploading} />
             <div className="grid min-h-[300px] grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
               {selectedFiles.map((file, index) => (
-                <div key={index} className="liquid-file-card flex h-56 flex-col rounded-lg p-3">
-                  <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg bg-white/60" onClick={() => handleImageClick(index)}>
+                <div key={index} className="liquid-file-card flex h-60 flex-col rounded-[14px] p-3">
+                  <div className="relative min-h-0 flex-1 overflow-hidden rounded-[10px] bg-white/60" onClick={() => handleImageClick(index)}>
                     {file.type.startsWith('image/') && (
                       <Image
                         src={URL.createObjectURL(file)}
-                        alt={`Preview ${file.name}`}
+                        alt={`Preview ${getDisplayName(file)}`}
                         fill={true}
                         className="object-cover"
                       />
@@ -561,12 +598,18 @@ export default function Home() {
                     )}
                     {!file.type.startsWith('image/') && !file.type.startsWith('video/') && (
                       <div className="flex h-full w-full items-center justify-center bg-white/60 p-4 text-center text-sm font-semibold text-slate-600">
-                        <p className="break-all">{file.name}</p>
+                        <p className="break-all">{getDisplayName(file)}</p>
                       </div>
                     )}
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-2">
-                    <p className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-600" title={file.name}>{file.name}</p>
+                    <input
+                      value={getDisplayName(file)}
+                      onChange={(event) => updateFileName(index, event.target.value)}
+                      onClick={(event) => event.stopPropagation()}
+                      className="apple-text-field min-w-0 flex-1"
+                      aria-label="文件名"
+                    />
                     <div className="flex shrink-0 items-center gap-2">
                       <button className="liquid-icon-button text-sky-600" onClick={() => handleImageClick(index)} aria-label="预览">
                         <FontAwesomeIcon icon={faSearchPlus} />
@@ -596,10 +639,10 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="glass-bar mt-4 grid grid-cols-1 gap-3 rounded-lg p-3 md:grid-cols-[auto_1fr_auto_auto] md:items-center">
+          <div className="glass-bar mt-4 grid grid-cols-1 gap-3 rounded-[16px] p-3 md:grid-cols-[auto_1fr_auto_auto] md:items-center">
             <label
               htmlFor="file-upload"
-              className="glass-button-primary flex h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:-translate-y-px"
+              className="apple-button apple-button-primary flex h-9 cursor-pointer gap-2"
             >
               <FontAwesomeIcon icon={faImages} className="h-4 w-4" />
               选择图片
@@ -611,18 +654,18 @@ export default function Home() {
               onChange={handleFileChange}
               multiple
             />
-            <div className="glass-input flex h-11 items-center rounded-lg px-4 text-sm font-semibold text-slate-600">
+            <div className="apple-text-field flex h-9 items-center text-slate-600">
               已选择 {selectedFiles.length} 张，共 {getTotalSizeInMB(selectedFiles)} M
             </div>
             <button
-              className="glass-button-danger flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:-translate-y-px"
+              className="apple-button apple-button-danger flex h-9 gap-2"
               onClick={handleClear}
             >
               <FontAwesomeIcon icon={faTrashAlt} className="h-4 w-4" />
               清除
             </button>
             <button
-              className={`glass-button-primary flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition hover:-translate-y-px ${uploading ? 'pointer-events-none opacity-50' : ''}`}
+              className={`apple-button apple-button-primary flex h-9 gap-2 ${uploading ? 'pointer-events-none opacity-50' : ''}`}
               onClick={() => handleUpload()}
             >
               <FontAwesomeIcon icon={faUpload} className="h-4 w-4" />
@@ -635,7 +678,7 @@ export default function Home() {
         <div className="min-h-[180px]">
           {uploadedImages.length > 0 && (
             <>
-              <div className="glass-bar mb-4 flex flex-wrap gap-2 rounded-lg p-2">
+              <div className="glass-bar mb-4 flex flex-wrap gap-2 rounded-[16px] p-2">
                 {[
                   ['preview', 'Preview'],
                   ['htmlLinks', 'HTML'],
@@ -646,7 +689,7 @@ export default function Home() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === tab ? 'glass-button-primary' : 'glass-button'}`}
+                    className={`apple-button ${activeTab === tab ? 'apple-button-primary' : 'apple-button-muted'}`}
                   >
                     {label}
                   </button>
@@ -660,9 +703,9 @@ export default function Home() {
 
       {selectedImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-5 backdrop-blur-sm" onClick={handleCloseImage}>
-          <div className="glass-panel relative flex max-h-[86vh] max-w-[92vw] flex-col items-center justify-between rounded-lg p-3">
+          <div className="apple-sheet relative flex max-h-[86vh] max-w-[92vw] flex-col items-center justify-between p-3">
             <button
-              className="glass-button-danger absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-lg leading-none"
+              className="apple-button apple-button-danger absolute right-3 top-3 flex h-8 w-8 px-0 text-lg leading-none"
               onClick={handleCloseImage}
             >
               &times;
@@ -674,18 +717,18 @@ export default function Home() {
                 alt="Selected"
                 width={500}
                 height={500}
-                className="max-h-[80vh] w-auto max-w-full rounded-lg object-contain"
+                className="max-h-[80vh] w-auto max-w-full rounded-[16px] object-contain"
               />
             ) : boxType === "video" ? (
               <video
                 src={selectedImage}
                 width={500}
                 height={500}
-                className="max-h-[80vh] w-auto max-w-full rounded-lg object-contain"
+                className="max-h-[80vh] w-auto max-w-full rounded-[16px] object-contain"
                 controls
               />
             ) : boxType === "other" ? (
-              <div className="glass-panel rounded-lg p-4 text-slate-800">
+              <div className="apple-sheet p-4 text-slate-800">
                 <p>Unsupported file type</p>
               </div>
             ) : (
@@ -696,7 +739,7 @@ export default function Home() {
       )}
 
       <div className="relative z-10 mx-auto mt-8 flex w-full max-w-6xl justify-center">
-        <div className="glass-bar flex h-12 w-full max-w-6xl items-center justify-center rounded-lg px-4 text-xs text-slate-500">
+        <div className="glass-bar flex h-12 w-full max-w-6xl items-center justify-center rounded-[16px] px-4 text-xs text-slate-500">
           <Footer />
         </div>
       </div>

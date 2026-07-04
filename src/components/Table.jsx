@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Switcher from '@/components/SwitchButton';
 import { toast } from "react-toastify";
 import React, { useRef } from 'react';
-import TooltipItem from '@/components/Tooltip';
 import FullScreenIcon from "@/components/FullScreenIcon"
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import { readAdminJson } from '@/lib/adminResponse';
@@ -171,29 +170,27 @@ export default function Table({ data: initialData = [], isLoading = false }) {
 
     const elementSize = 400;
     return (
-        <div className="glass-panel relative overflow-hidden rounded-lg">
+        <div className="apple-sheet relative overflow-hidden">
             <div className="overflow-x-auto">
-            <table className="min-w-[1104px] table-fixed text-left">
+            <table className="w-full min-w-[964px] table-fixed text-left">
                 <colgroup>
                     <col className="w-[220px]" />
                     <col className="w-[104px]" />
-                    <col className="w-[140px]" />
-                    <col className="w-[220px]" />
-                    <col className="w-[140px]" />
-                    <col className="w-[60px]" />
-                    <col className="w-[70px]" />
                     <col className="w-[150px]" />
+                    <col className="w-[70px]" />
+                    <col className="w-[80px]" />
+                    <col className="w-[150px]" />
+                    <col className="w-[190px]" />
                 </colgroup>
                 <thead >
-                    <tr className="sticky top-0 z-20 bg-white/65 backdrop-blur-xl">
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">name</th>
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">preview</th>
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">time</th>
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">referer</th>
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">ip</th>
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">PV</th>
-                        <th className="border-b border-white/60 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">rating</th>
-                        <th className="sticky right-0 z-10 border-b border-white/60 bg-white/75 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 backdrop-blur-xl">限制访问</th>
+                    <tr className="sticky top-0 z-20 bg-white/70 backdrop-blur-xl">
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">name</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">preview</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">time</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">PV</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">rating</th>
+                        <th className="border-b border-black/5 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55">链接</th>
+                        <th className="sticky right-0 z-10 border-b border-black/5 bg-white/75 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-black/55 backdrop-blur-xl">限制访问</th>
                     </tr>
                 </thead>
                 <tbody className={isLoading ? 'opacity-60' : ''}>
@@ -239,7 +236,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                         }}>
                         {data.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="px-4 py-14 text-center text-sm font-medium text-slate-500">
+                                <td colSpan={7} className="px-4 py-14 text-center text-sm font-medium text-slate-500">
                                     {isLoading ? '正在加载数据...' : '暂无数据'}
                                 </td>
                             </tr>
@@ -292,14 +289,16 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                                 <td className="border-b border-white/45 px-4 py-3 text-center text-sm leading-5 text-slate-600">
                                     <div className="line-clamp-2">{item.time}</div>
                                 </td>
-                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
-                                    <TooltipItem tooltipsText={item.referer} position="bottom" >{item.referer}</TooltipItem>
-                                </td>
-                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm text-slate-600">
-                                    <TooltipItem tooltipsText={item.ip} position="bottom" >{item.ip}</TooltipItem>
-                                </td>
                                 <td className="border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.total}</td>
                                 <td className="border-b border-white/45 px-4 py-3 text-center text-sm font-semibold text-slate-700">{item.rating}</td>
+                                <td className="border-b border-white/45 px-4 py-3 text-center text-sm text-slate-700">
+                                    <button
+                                        onClick={() => handleCopy(getImgUrl(item.url))}
+                                        className="apple-button apple-button-muted mx-auto min-w-[86px]"
+                                    >
+                                        复制链接
+                                    </button>
+                                </td>
                                 <td className="sticky right-0 z-10 border-b border-white/45 bg-white/76 px-4 py-3 text-center text-sm text-slate-700 backdrop-blur-xl">
                                     <div className="flex items-center justify-center gap-3">
                                         <Switcher initialChecked={item.rating} initName={item.url} />
@@ -307,7 +306,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                                             onClick={() => {
                                                 handleDelete(item.url)
                                             }}
-                                            className="glass-button-danger min-w-[56px] whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold leading-none transition hover:-translate-y-px focus:outline-none focus:ring-2 focus:ring-red-300"
+                                            className="apple-button apple-button-danger min-w-[56px] whitespace-nowrap"
                                         >
                                             删除
                                         </button>
@@ -326,13 +325,13 @@ export default function Table({ data: initialData = [], isLoading = false }) {
             {modalData && (
                 <div onClick={handleClickOutside} className="fixed inset-0 z-50 m-5 flex items-center justify-center overflow-y-auto">
                     <div className="fixed inset-0 bg-slate-950/45 backdrop-blur-sm"></div>
-                    <div ref={modalRef} className="glass-panel relative flex h-1/2 w-9/10 flex-none flex-col rounded-lg sm:w-9/10 md:w-96 lg:w-120 xl:w-144 2xl:w-160">
-                        <button className="glass-button absolute right-2 top-2 rounded-lg p-1 text-red-600 hover:text-red-700" onClick={handleCloseModal}>
+                    <div ref={modalRef} className="apple-sheet relative flex w-9/10 flex-none flex-col p-5 sm:w-9/10 md:w-96 lg:w-120 xl:w-144 2xl:w-160">
+                        <button className="apple-button apple-button-muted absolute right-4 top-4 h-7 w-7 px-0 text-red-600" onClick={handleCloseModal}>
                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                        <div className='flex flex-col  mt-10'>
+                        <div className='mt-12 flex flex-col gap-2'>
                             {[
                                 { text: getImgUrl(modalData.url), onClick: () => handleCopy(getImgUrl(modalData.url)) },
                                 { text: `![${modalData.url}](${getImgUrl(modalData.url)})`, onClick: () => handleCopy(`![${modalData.name}](${getImgUrl(modalData.url)})`) },
@@ -344,7 +343,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                                     readOnly
                                     value={item.text}
                                     onClick={item.onClick}
-                                    className="glass-input mx-2 my-1 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                                    className="apple-text-field"
                                 />
 
 
