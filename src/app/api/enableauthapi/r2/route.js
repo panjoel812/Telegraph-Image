@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
 
 
 
@@ -9,6 +10,7 @@ export async function POST(request) {
 
 
 	const { env, cf, ctx } = getRequestContext();
+	const imageDatabase = hasImageDatabase(env) ? getImageDatabase(env) : null;
 
 	if (!env.IMGRS) {
 		return Response.json({
@@ -77,7 +79,7 @@ export async function POST(request) {
 			"name": filename
 		}
 
-		if (!env.IMG) {
+		if (!imageDatabase) {
 			data.env_img = "null"
 			return Response.json({
 				...data,
@@ -90,7 +92,7 @@ export async function POST(request) {
 			try {
 				const rating_index = await getRating(env, `${req_url.origin}/api/rfile/${filename}`);
 				const nowTime = await get_nowTime()
-				await insertImageData(env.IMG, `/rfile/${filename}`, Referer, clientIp, rating_index, nowTime);
+				await insertImageData(imageDatabase, `/rfile/${filename}`, Referer, clientIp, rating_index, nowTime);
 
 				return Response.json({
 					...data,
@@ -107,7 +109,8 @@ export async function POST(request) {
 
 			} catch (error) {
 				console.log(error);
-				await insertImageData(env.IMG, `/rfile/${filename}`, Referer, clientIp, -1, nowTime);
+				const fallbackTime = await get_nowTime()
+				await insertImageData(imageDatabase, `/rfile/${filename}`, Referer, clientIp, -1, fallbackTime);
 
 
 				return Response.json({

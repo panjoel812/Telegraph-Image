@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,6 +12,7 @@ const corsHeaders = {
 export async function GET(request, { params }) {
   const { name } = params
   let { env, cf, ctx } = getRequestContext();
+  const imageDatabase = hasImageDatabase(env) ? getImageDatabase(env) : null;
 
 
 
@@ -39,16 +41,16 @@ export async function GET(request, { params }) {
     })
     if (Referer == req_url.origin + "/admin" || Referer == req_url.origin + "/list" || Referer == req_url.origin + "/") {
       return res
-    } else if (!env.IMG) {
+    } else if (!imageDatabase) {
       return res
     } else {
       const nowTime = await get_nowTime()
-      await insertTgImgLog(env.IMG, `/file/${name}`, Referer, clientIp, nowTime);
-      const rating = await getRating(env.IMG, `/file/${name}`);
+      await insertTgImgLog(imageDatabase, `/file/${name}`, Referer, clientIp, nowTime);
+      const rating = await getRating(imageDatabase, `/file/${name}`);
       if (rating) {
         try {
           // UPDATE imginfo SET total = total +2 WHERE url = '/file/d71ebe27cab32a2f61e25.png';
-          const setData = await env.IMG.prepare(`UPDATE imginfo SET total = total +1 WHERE url = '/file/${name}';`).run()
+          const setData = await imageDatabase.prepare(`UPDATE imginfo SET total = total +1 WHERE url = '/file/${name}';`).run()
           // console.log(setData);
         } catch (error) {
           console.log(error);
@@ -65,7 +67,7 @@ export async function GET(request, { params }) {
             const rating_index = await getModerateContentRating(env, `/file/${name}`)
             const nowTime = await get_nowTime()
             // console.log( `/file/${name}`, Referer, clientIp, rating_index, nowTime);
-            await insertImgInfo(env.IMG, `/file/${name}`, Referer, clientIp, rating_index, nowTime);
+            await insertImgInfo(imageDatabase, `/file/${name}`, Referer, clientIp, rating_index, nowTime);
        
 
             if (rating_index == 3) {

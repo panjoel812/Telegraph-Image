@@ -1,4 +1,5 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase } from '@/lib/cloudflareBindings';
 import {
   bindStatement,
   buildLogQueries,
@@ -14,14 +15,11 @@ export async function POST(request) {
   try {
     payload = normalizeAdminPayload(await request.json());
     const { env } = getRequestContext();
-
-    if (!env?.IMG) {
-      throw new Error('IMG D1 binding is not configured');
-    }
+    const database = getImageDatabase(env);
 
     const queries = buildLogQueries(payload);
-    const rowsStatement = bindStatement(env.IMG.prepare(queries.rows.sql), queries.rows.bindings);
-    const totalStatement = bindStatement(env.IMG.prepare(queries.total.sql), queries.total.bindings);
+    const rowsStatement = bindStatement(database.prepare(queries.rows.sql), queries.rows.bindings);
+    const totalStatement = bindStatement(database.prepare(queries.total.sql), queries.total.bindings);
     const [{ results = [] }, total] = await Promise.all([
       rowsStatement.all(),
       totalStatement.first(),

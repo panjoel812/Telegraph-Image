@@ -1,4 +1,5 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase } from '@/lib/cloudflareBindings';
 import { jsonHeaders } from '../adminRouteUtils';
 
 export const runtime = 'edge';
@@ -7,16 +8,13 @@ export async function DELETE(request) {
   try {
     const { name } = await request.json();
     const { env } = getRequestContext();
-
-    if (!env?.IMG) {
-      throw new Error('IMG D1 binding is not configured');
-    }
+    const database = getImageDatabase(env);
 
     if (typeof name !== 'string' || !name.trim()) {
       throw new Error('Missing image name');
     }
 
-    const setData = await env.IMG.prepare('DELETE FROM imginfo WHERE url = ?').bind(name).run();
+    const setData = await database.prepare('DELETE FROM imginfo WHERE url = ?').bind(name).run();
 
     return Response.json({
       code: 200,

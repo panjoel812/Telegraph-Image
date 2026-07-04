@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +19,7 @@ const corsHeaders = {
 
 export async function POST(request) {
   const { env, cf, ctx } = getRequestContext();
+  const imageDatabase = hasImageDatabase(env) ? getImageDatabase(env) : null;
   const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || request.socket.remoteAddress;
   const clientIp = ip ? ip.split(',')[0].trim() : 'IP not found';
   const Referer = request.headers.get('Referer') || "Referer";
@@ -60,9 +62,9 @@ export async function POST(request) {
     }
 
     try {
-      if (env.IMG) {
+      if (imageDatabase) {
         const nowTime = await get_nowTime()
-        await insertImageData(env.IMG, finalUrl, Referer, clientIp, 7, nowTime);
+        await insertImageData(imageDatabase, finalUrl, Referer, clientIp, 7, nowTime);
       }
     } catch (error) {
 

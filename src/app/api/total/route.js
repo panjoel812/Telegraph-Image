@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from 'next/headers'
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
 
 // ...
 
@@ -15,6 +16,7 @@ export const runtime = 'edge';
 export async function GET(request) {
   // 获取客户端的IP地址
   const { env, cf, ctx } = getRequestContext();
+  const imageDatabase = hasImageDatabase(env) ? getImageDatabase(env) : null;
   // console.log(dd);
   let totalImg = {
     status: 404,
@@ -22,8 +24,8 @@ export async function GET(request) {
   }
 
   try {
-    if (env.IMG) {
-      const total = await env.IMG.prepare(`SELECT COUNT(*) as total FROM imginfo`).first()
+    if (imageDatabase) {
+      const total = await imageDatabase.prepare(`SELECT COUNT(*) as total FROM imginfo`).first()
       return Response.json({
         "code": 200,
         "success": true,

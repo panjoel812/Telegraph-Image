@@ -1,4 +1,5 @@
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase } from '@/lib/cloudflareBindings';
 import { jsonHeaders } from '../adminRouteUtils';
 
 export const runtime = 'edge';
@@ -7,11 +8,8 @@ export async function PUT(request) {
   try {
     const { rating, name } = await request.json();
     const { env } = getRequestContext();
+    const database = getImageDatabase(env);
     const nextRating = Number(rating);
-
-    if (!env?.IMG) {
-      throw new Error('IMG D1 binding is not configured');
-    }
 
     if (typeof name !== 'string' || !name.trim()) {
       throw new Error('Missing image name');
@@ -21,7 +19,7 @@ export async function PUT(request) {
       throw new Error('Invalid rating value');
     }
 
-    const setData = await env.IMG.prepare('UPDATE imginfo SET rating = ? WHERE url = ?').bind(nextRating, name).run();
+    const setData = await database.prepare('UPDATE imginfo SET rating = ? WHERE url = ?').bind(nextRating, name).run();
 
     return Response.json({
       code: 200,

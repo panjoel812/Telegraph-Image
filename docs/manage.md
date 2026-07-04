@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS imginfo (
     `url` text,
     `referer` text,
 	`ip` varchar(255),
-	`rating` text,
+	`rating` integer,
 	`total` integer,
 	`time` DATE
 );
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS imginfo (
 <img src="./img/d4.png"   height="50%" width="50%"/>
 <img src="./img/d5.png"   height="50%" width="50%"/>
 
-3. 选择部署完成`telegraph-Image`项目，前往后台依次点击`设置`->`函数`->`D1 数据库绑定`->`编辑绑定`->`变量名称填写`：`IMG` 命名空间 选择你提前创建好的D1 数据库绑定
+3. 选择部署完成`telegraph-Image`项目，前往后台依次点击`设置`->`函数`->`D1 数据库绑定`->`编辑绑定`->`变量名称填写`：`DB` 命名空间选择你提前创建好的D1 数据库绑定。旧版本使用过 `IMG`，当前代码会兼容 `IMG`，但推荐新部署统一使用 `DB`。
 
 4. 配置`Cloudflare R2`,前往后台依次点击`设置`->`函数`->`R2 存储桶绑定`->`编辑绑定`->`变量名称填写`：`IMGRS` 命名空间 选择你提前创建好的R2 存储桶绑定
 
@@ -80,4 +80,3 @@ CREATE TABLE IF NOT EXISTS imginfo (
 
 ## 返回最新部署完成`telegraph-Image`项目后台点击`重试部署` 使环境变量生效
 <img src="./img/d1end.png"   height="50%" width="50%"/>
-

@@ -1,5 +1,6 @@
 export const runtime = 'edge';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { getImageDatabase, hasImageDatabase } from '@/lib/cloudflareBindings';
 
 
 
@@ -12,6 +13,7 @@ const corsHeaders = {
 
 export async function POST(request) {
 	const { env, cf, ctx } = getRequestContext();
+	const imageDatabase = hasImageDatabase(env) ? getImageDatabase(env) : null;
 	
 	if (!env.TG_BOT_TOKEN || !env.TG_CHAT_ID) {
 		return Response.json({
@@ -71,7 +73,7 @@ export async function POST(request) {
 			"code": 200,
 			"name": fileData.file_name
 		}
-		if (!env.IMG) {
+		if (!imageDatabase) {
 			data.env_img = "null"
 			return Response.json({
 				...data,
@@ -84,7 +86,7 @@ export async function POST(request) {
 			try {
 				const rating_index = await getRating(env, `${fileData.file_id}`);
 				const nowTime = await get_nowTime()
-				await insertImageData(env.IMG, `/cfile/${fileData.file_id}`, Referer, clientIp, rating_index, nowTime);
+				await insertImageData(imageDatabase, `/cfile/${fileData.file_id}`, Referer, clientIp, rating_index, nowTime);
 
 				return Response.json({
 					...data,
@@ -103,7 +105,8 @@ export async function POST(request) {
 
 			} catch (error) {
 				console.log(error);
-				await insertImageData(env.IMG, `/cfile/${fileData.file_id}`, Referer, clientIp, -1, nowTime);
+				const fallbackTime = await get_nowTime()
+				await insertImageData(imageDatabase, `/cfile/${fileData.file_id}`, Referer, clientIp, -1, fallbackTime);
 
 
 				return Response.json({
