@@ -42,11 +42,14 @@
   }
 
   .glass-bar {
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    background: rgba(255, 255, 255, 0.58);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.68), 0 12px 36px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.76);
-    backdrop-filter: blur(30px) saturate(165%);
-    -webkit-backdrop-filter: blur(30px) saturate(165%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background:
+      linear-gradient(0deg, rgba(245, 245, 245, 0.67), rgba(245, 245, 245, 0.67)),
+      rgba(255, 255, 255, 0.64);
+    background-blend-mode: normal, color-dodge;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.66), 0 16px 48px rgba(0, 0, 0, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(36px) saturate(170%);
+    -webkit-backdrop-filter: blur(36px) saturate(170%);
   }
 
   .glass-button {
@@ -101,30 +104,45 @@
     -webkit-backdrop-filter: blur(34px) saturate(165%);
   }
 
+  .apple-toolbar {
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 22px;
+    background:
+      linear-gradient(0deg, rgba(245, 245, 245, 0.67), rgba(245, 245, 245, 0.67)),
+      rgba(255, 255, 255, 0.66);
+    background-blend-mode: normal, color-dodge;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.68), 0 16px 48px rgba(0, 0, 0, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(36px) saturate(170%);
+    -webkit-backdrop-filter: blur(36px) saturate(170%);
+  }
+
   .apple-button {
     display: inline-flex;
-    min-height: 28px;
+    min-height: 30px;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    padding: 0 16px;
+    gap: 6px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0 15px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 510;
     line-height: 16px;
     color: rgba(0, 0, 0, 0.85);
     background:
-      linear-gradient(0deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.52)),
-      rgba(0, 0, 0, 0.04);
-    background-blend-mode: normal, plus-darker;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+      linear-gradient(0deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.54)),
+      rgba(0, 0, 0, 0.05);
+    background-blend-mode: normal, multiply;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.045), inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 6px 16px rgba(0, 0, 0, 0.05);
+    transition: transform 140ms ease, opacity 140ms ease, background 140ms ease, box-shadow 140ms ease;
   }
 
   .apple-button:hover {
     transform: translateY(-1px);
     background:
-      linear-gradient(0deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.68)),
-      rgba(0, 0, 0, 0.04);
+      linear-gradient(0deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.62)),
+      rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 8px 20px rgba(0, 0, 0, 0.07);
   }
 
   .apple-button-primary {
@@ -142,7 +160,7 @@
   .apple-button-danger {
     background: rgba(255, 56, 60, 0.23);
     color: #ff383c;
-    box-shadow: none;
+    box-shadow: 0 0 0 1px rgba(255, 56, 60, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.42);
   }
 
   .apple-button-danger:hover {
@@ -151,9 +169,10 @@
   }
 
   .apple-button-muted {
-    background: rgba(230, 230, 230, 0.72);
+    background:
+      linear-gradient(0deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.35)),
+      rgba(230, 230, 230, 0.78);
     color: rgba(0, 0, 0, 0.85);
-    mix-blend-mode: plus-darker;
   }
 
   .apple-button-muted:hover {
@@ -163,10 +182,10 @@
 
   .apple-text-field,
   .apple-popup {
-    height: 28px;
+    height: 30px;
     border: 0;
-    border-radius: 7px;
-    padding: 0 10px;
+    border-radius: 999px;
+    padding: 0 12px;
     font-size: 13px;
     font-weight: 510;
     line-height: 16px;
@@ -182,6 +201,77 @@
   .apple-text-field:focus,
   .apple-popup:focus {
     box-shadow: 0 0 0 3px rgba(13, 111, 255, 0.22), 0 0 0 1px rgba(13, 111, 255, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .apple-search {
+    display: flex;
+    height: 36px;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 0 10px 0 12px;
+    background:
+      linear-gradient(0deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+      rgba(255, 255, 255, 0.5);
+    background-blend-mode: normal, multiply;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .apple-search:focus-within {
+    box-shadow: 0 0 0 3px rgba(13, 111, 255, 0.18), 0 0 0 1px rgba(13, 111, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.76);
+  }
+
+  .apple-search-icon {
+    flex: 0 0 16px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .apple-search-input {
+    min-width: 0;
+    flex: 1 1 auto;
+    border: 0;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 510;
+    line-height: 16px;
+    color: #1a1a1a;
+    outline: none;
+  }
+
+  .apple-search-input::placeholder {
+    color: rgba(0, 0, 0, 0.42);
+  }
+
+  .apple-segmented {
+    display: inline-flex;
+    height: 30px;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px;
+    background: rgba(0, 0, 0, 0.045);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.03), 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .apple-segmented-item {
+    display: inline-flex;
+    min-width: 72px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 510;
+    line-height: 16px;
+    color: rgba(0, 0, 0, 0.68);
+    transition: background 140ms ease, box-shadow 140ms ease, color 140ms ease;
+  }
+
+  .apple-segmented-item[data-active="true"] {
+    color: rgba(0, 0, 0, 0.88);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 3px 10px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92);
   }
 
   .liquid-dropzone {
@@ -276,6 +366,9 @@
   }
 
   .Toastify__toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
     min-height: 72px;
     margin-bottom: 10px;
     padding: 12px 9px 12px 13px;
@@ -294,24 +387,28 @@
 
   .Toastify__toast::before {
     content: "";
+    display: block;
     flex: 0 0 32px;
     width: 32px;
     height: 32px;
-    margin-right: 13px;
     border-radius: 8px;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48)),
-      #0d6fff;
+      url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%230D6FFF'/%3E%3Cpath d='M9 21.5h14a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 23 10.5H9A1.5 1.5 0 0 0 7.5 12v8A1.5 1.5 0 0 0 9 21.5Zm1.6-2.3 3.7-4 2.6 2.75 1.9-2.05 3.6 3.3H10.6Zm9.35-5.35a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z' fill='white'/%3E%3C/svg%3E"),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48));
+    background-size: cover;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   }
 
   .Toastify__toast-body {
+    flex: 1 1 auto;
+    min-width: 0;
     align-items: flex-start;
     gap: 0;
+    margin: 0;
     padding: 0;
     font-size: 13px;
     line-height: 16px;
-    letter-spacing: -0.008em;
+    letter-spacing: 0;
   }
 
   .Toastify__toast-body > div:last-child {
@@ -414,8 +511,15 @@ body {
   width: min(344px, calc(100vw - 32px)) !important;
 }
 
+.Toastify__toast-container--top-right {
+  top: 82px !important;
+  right: 16px !important;
+}
+
 .Toastify__toast {
   display: flex !important;
+  align-items: flex-start !important;
+  gap: 13px !important;
   min-height: 72px !important;
   margin-bottom: 10px !important;
   padding: 12px 9px 12px 13px !important;
@@ -438,21 +542,24 @@ body {
   flex: 0 0 32px !important;
   width: 32px !important;
   height: 32px !important;
-  margin-right: 13px !important;
   border-radius: 8px !important;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48)),
-    #0d6fff !important;
+    url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%230D6FFF'/%3E%3Cpath d='M9 21.5h14a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 23 10.5H9A1.5 1.5 0 0 0 7.5 12v8A1.5 1.5 0 0 0 9 21.5Zm1.6-2.3 3.7-4 2.6 2.75 1.9-2.05 3.6 3.3H10.6Zm9.35-5.35a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z' fill='white'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48)) !important;
+  background-size: cover !important;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
 }
 
 .Toastify__toast-body {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
   align-items: flex-start !important;
   gap: 0 !important;
+  margin: 0 !important;
   padding: 0 !important;
   font-size: 13px !important;
   line-height: 16px !important;
-  letter-spacing: -0.008em !important;
+  letter-spacing: 0 !important;
 }
 
 .Toastify__toast-body > div:last-child {

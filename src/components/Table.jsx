@@ -178,6 +178,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
 
     const elementSize = 400;
     return (
+        <>
         <div className="apple-sheet relative overflow-hidden">
             <div className="overflow-x-auto">
             <table className="w-full min-w-[1064px] table-fixed text-left">
@@ -334,6 +335,7 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                 </tbody>
             </table>
             </div>
+        </div>
 
 
             {modalData && (
@@ -400,6 +402,6 @@ export default function Table({ data: initialData = [], isLoading = false }) {
                 </div>
             )}
 
-        </div>
+        </>
     );
 }

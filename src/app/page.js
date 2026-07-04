@@ -443,7 +443,7 @@ export default function Home() {
         return (
           <div className="flex flex-col gap-3">
             {uploadedImages.map((data, index) => (
-              <div key={index} className="glass-panel flex flex-col gap-4 rounded-lg p-3 md:flex-row">
+              <div key={index} className="apple-sheet flex flex-col gap-4 p-3 md:flex-row">
                 {renderFile(data, index)}
                 <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
                   {[
@@ -457,7 +457,7 @@ export default function Home() {
                       readOnly
                       value={item.text}
                       onClick={item.onClick}
-                      className="glass-input rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none"
+                      className="apple-text-field h-9 text-slate-800"
                     />
                   ))}
                 </div>
@@ -468,7 +468,7 @@ export default function Home() {
         );
       case 'htmlLinks':
         return (
-          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
+          <div ref={parentRef} className="apple-sheet p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2 ">
                 <code className=" w-2 break-all">{`<img src="${data.url}" alt="${getDisplayName(data)}" />`}</code>
@@ -478,7 +478,7 @@ export default function Home() {
         );
       case 'markdownLinks':
         return (
-          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
+          <div ref={parentRef} className="apple-sheet p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
                 <code className=" w-2 break-all">{`![${getDisplayName(data)}](${data.url})`}</code>
@@ -488,7 +488,7 @@ export default function Home() {
         );
       case 'bbcodeLinks':
         return (
-          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
+          <div ref={parentRef} className="apple-sheet p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
                 <code className=" w-2 break-all">{`[img]${data.url}[/img]`}</code>
@@ -498,7 +498,7 @@ export default function Home() {
         );
       case 'viewLinks':
         return (
-          <div ref={parentRef} className="glass-panel rounded-lg p-4 text-sm text-slate-700" onClick={handleCopyCode}>
+          <div ref={parentRef} className="apple-sheet p-4 text-sm text-slate-700" onClick={handleCopyCode}>
             {uploadedImages.map((data, index) => (
               <div key={index} className="mb-2">
                 <code className=" w-2 break-all">{`${data.url}`}</code>
@@ -550,9 +550,9 @@ export default function Home() {
   return (
     <main className="liquid-page min-h-screen overflow-x-hidden px-4 pb-24 pt-24 text-slate-900 sm:px-6 lg:px-8">
       <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-        <nav className="glass-bar flex h-14 w-full max-w-6xl items-center justify-between rounded-[16px] px-4">
+        <nav className="apple-toolbar flex h-14 w-full max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3 text-base font-bold text-slate-900">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/70 text-sky-600 shadow-sm">
+            <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-white/75 text-sky-600 shadow-sm ring-1 ring-black/[0.04]">
               <FontAwesomeIcon icon={faImages} className="h-4 w-4" />
             </span>
             图床
@@ -666,7 +666,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="glass-bar mt-4 grid grid-cols-1 gap-3 rounded-[16px] p-3 md:grid-cols-[auto_1fr_auto_auto] md:items-center">
+          <div className="apple-toolbar mt-4 grid grid-cols-1 gap-3 p-3 md:grid-cols-[auto_1fr_auto_auto] md:items-center">
             <label
               htmlFor="file-upload"
               className="apple-button apple-button-primary flex h-9 cursor-pointer gap-2"
@@ -705,7 +705,7 @@ export default function Home() {
         <div className="min-h-[180px]">
           {uploadedImages.length > 0 && (
             <>
-              <div className="glass-bar mb-4 flex flex-wrap gap-2 rounded-[16px] p-2">
+              <div className="apple-segmented mb-4 flex h-auto flex-wrap gap-1">
                 {[
                   ['preview', 'Preview'],
                   ['htmlLinks', 'HTML'],
@@ -716,7 +716,8 @@ export default function Home() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`apple-button ${activeTab === tab ? 'apple-button-primary' : 'apple-button-muted'}`}
+                    className="apple-segmented-item"
+                    data-active={activeTab === tab}
                   >
                     {label}
                   </button>
@@ -766,7 +767,7 @@ export default function Home() {
       )}
 
       <div className="relative z-10 mx-auto mt-8 flex w-full max-w-6xl justify-center">
-        <div className="glass-bar flex h-12 w-full max-w-6xl items-center justify-center rounded-[16px] px-4 text-xs text-slate-500">
+        <div className="apple-toolbar flex min-h-12 w-full max-w-6xl items-center justify-center px-4 py-3 text-xs text-slate-500">
           <Footer />
         </div>
       </div>
