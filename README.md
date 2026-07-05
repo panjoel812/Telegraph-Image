@@ -242,7 +242,45 @@ curl "https://你的域名/api/picgo"
 
 ## PicGo 配置
 
-PicGo 可以使用自定义 Web 上传器类插件连接本项目。不同插件界面名称略有差异，按下面含义填写即可。
+PicGo 通过插件扩展第三方图床。本仓库已经内置一个专用插件：
+
+```text
+picgo-plugin-telegraph-image
+```
+
+### 方式一：安装本仓库内置插件
+
+适合 PicGo 3.0 桌面版。
+
+1. 打开 PicGo。
+2. 进入 `插件` 页面。
+3. 点击插件工具栏里的本地导入图标。
+4. 选择仓库里的 `picgo-plugin-telegraph-image` 文件夹。
+5. 完全退出 PicGo，再重新打开。
+6. 进入 `图床设置`，选择 `Telegraph Image`。
+7. 填写 API 地址、Token、上传目标和文件夹。
+
+插件配置：
+
+| 配置项 | 值 |
+| --- | --- |
+| API 地址 | `https://你的域名/api/picgo` |
+| API_TOKEN | `你的_API_TOKEN` |
+| 上传目标 | `tgchannel` 或 `r2` |
+| 后台虚拟文件夹 | `PicGo` |
+
+macOS 也可以用命令安装：
+
+```bash
+cd "$HOME/Library/Application Support/picgo"
+npm install /Users/panjoel/Documents/Project/Telegraph-Image/picgo-plugin-telegraph-image
+```
+
+安装后必须完全退出并重启 PicGo。
+
+### 方式二：使用自定义 Web 上传器插件
+
+如果你更想使用第三方 Web Uploader 类插件，也可以按下面含义填写。不同插件界面名称略有差异。
 
 | 配置项 | 值 |
 | --- | --- |

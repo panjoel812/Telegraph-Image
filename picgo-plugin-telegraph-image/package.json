@@ -1,0 +1,19 @@
+{
+  "name": "picgo-plugin-telegraph-image",
+  "version": "0.1.0",
+  "description": "PicGo uploader for Telegraph Image / Cloudflare Pages image host.",
+  "main": "index.js",
+  "homepage": "https://github.com/panjoel812/Telegraph-Image#readme",
+  "keywords": [
+    "picgo",
+    "picgo-plugin",
+    "picgo-gui-plugin",
+    "image-uploader",
+    "telegraph-image",
+    "cloudflare-pages"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  }
+}
